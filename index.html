@@ -10,177 +10,65 @@
 
 <style>
   @property --angle{syntax:"<angle>";initial-value:0deg;inherits:false}
-
   :root{
-    --bg:#0b0e14;
-    --surface:rgba(17,24,38,.72);
-    --surface-solid:#111826;
-    --line:rgba(120,150,200,.16);
-    --text:#e8f2ff;
-    --muted:#6f7f99;
-    --cyan:#00e5ff;
-    --blue:#2979ff;
-    --violet:#7c4dff;
-    --green:#00ff9d;
+    --bg:#0b0e14;--surface:rgba(17,24,38,.72);--surface-solid:#111826;
+    --line:rgba(120,150,200,.16);--text:#e8f2ff;--muted:#6f7f99;
+    --cyan:#00e5ff;--blue:#2979ff;--violet:#7c4dff;--green:#00ff9d;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   [hidden]{display:none !important}
-
-  body{
-    min-height:100vh;
-    background:var(--bg);
-    color:var(--text);
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-    padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));
-    position:relative;overflow-x:hidden;isolation:isolate;
-  }
-
-  /* ---------- Background: aurora + grid + scanline ---------- */
+  body{min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));position:relative;overflow-x:hidden;isolation:isolate}
   .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
   .bg .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.38;animation:float 16s ease-in-out infinite}
   .bg .b1{width:420px;height:420px;background:var(--blue);top:-140px;left:-120px}
   .bg .b2{width:360px;height:360px;background:var(--cyan);top:30%;right:-140px;animation-delay:-5s;opacity:.22}
   .bg .b3{width:380px;height:380px;background:var(--violet);bottom:-160px;left:20%;animation-delay:-9s;opacity:.25}
-  .bg .grid{
-    position:absolute;inset:0;opacity:.5;
-    background-image:
-      linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(0,229,255,.05) 1px,transparent 1px);
-    background-size:46px 46px;
-    -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
-            mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
-  }
-  .bg .scan{
-    position:absolute;left:0;right:0;height:140px;top:-140px;
-    background:linear-gradient(180deg,transparent,rgba(0,229,255,.06),transparent);
-    animation:scan 7s linear infinite;
-  }
+  .bg .grid{position:absolute;inset:0;opacity:.5;background-image:linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%)}
+  .bg .scan{position:absolute;left:0;right:0;height:140px;top:-140px;background:linear-gradient(180deg,transparent,rgba(0,229,255,.06),transparent);animation:scan 7s linear infinite}
   @keyframes float{50%{transform:translate(30px,40px) scale(1.08)}}
   @keyframes scan{to{transform:translateY(calc(100vh + 280px))}}
-
   .wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;animation:rise .7s cubic-bezier(.22,1,.36,1) both}
   @keyframes rise{from{opacity:0;transform:translateY(14px)}}
-
-  /* ---------- Top secure bar ---------- */
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:10px 14px;border-radius:14px;
-    background:var(--surface);border:1px solid var(--line);
-    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-    font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-  }
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   .topbar .secure{display:flex;align-items:center;gap:8px;color:var(--green);font-weight:700}
   .topbar .secure svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .live{display:inline-flex;align-items:center;gap:7px}
   .live i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.8s infinite}
   @keyframes pulse{50%{opacity:.3;transform:scale(.8)}}
-
-  /* ---------- Ad slots ---------- */
-  .ad-slot{
-    min-height:90px;display:flex;align-items:center;justify-content:center;
-    border:1px dashed rgba(111,127,153,.35);border-radius:14px;
-    color:var(--muted);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
-    background:rgba(255,255,255,.012);overflow:hidden;
-  }
-
-  /* ---------- Glass cards with animated border ---------- */
-  .card{
-    position:relative;border-radius:20px;padding:20px;
-    background:var(--surface);
-    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .card::before{
-    content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
-    background:conic-gradient(from var(--angle),transparent 0 55%,var(--cyan) 75%,var(--blue) 88%,transparent 100%);
-    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;mask-composite:exclude;
-    animation:spin 6s linear infinite;opacity:.9;
-  }
-  .card::after{
-    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-    border:1px solid var(--line);
-  }
+  .ad-slot{min-height:90px;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(111,127,153,.35);border-radius:14px;color:var(--muted);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;background:rgba(255,255,255,.012);overflow:hidden}
+  .card{position:relative;border-radius:20px;padding:20px;background:var(--surface);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 18px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05)}
+  .card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from var(--angle),transparent 0 55%,var(--cyan) 75%,var(--blue) 88%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 6s linear infinite;opacity:.9}
+  .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;border:1px solid var(--line)}
   @keyframes spin{to{--angle:360deg}}
-
-  /* ---------- File card ---------- */
   .file{display:flex;align-items:center;gap:16px}
-  .shield{
-    position:relative;flex:none;width:62px;height:62px;display:grid;place-items:center;
-  }
-  .shield::before,.shield::after{
-    content:"";position:absolute;inset:0;border-radius:18px;
-    border:1px solid rgba(0,229,255,.55);
-    animation:ping 2.6s cubic-bezier(.2,.6,.3,1) infinite;
-  }
+  .shield{position:relative;flex:none;width:62px;height:62px;display:grid;place-items:center}
+  .shield::before,.shield::after{content:"";position:absolute;inset:0;border-radius:18px;border:1px solid rgba(0,229,255,.55);animation:ping 2.6s cubic-bezier(.2,.6,.3,1) infinite}
   .shield::after{animation-delay:1.3s}
   @keyframes ping{from{transform:scale(1);opacity:.7}to{transform:scale(1.55);opacity:0}}
-  .shield-core{
-    position:relative;width:62px;height:62px;border-radius:18px;display:grid;place-items:center;
-    background:linear-gradient(145deg,rgba(0,229,255,.2),rgba(41,121,255,.08));
-    border:1px solid rgba(0,229,255,.5);
-    box-shadow:0 0 26px rgba(0,229,255,.3), inset 0 0 18px rgba(0,229,255,.12);
-  }
+  .shield-core{position:relative;width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(0,229,255,.2),rgba(41,121,255,.08));border:1px solid rgba(0,229,255,.5);box-shadow:0 0 26px rgba(0,229,255,.3),inset 0 0 18px rgba(0,229,255,.12)}
   .shield-core svg{width:32px;height:32px;stroke:var(--cyan);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(0,229,255,.8))}
   .file-text{min-width:0;flex:1}
   .file-name{font-weight:800;font-size:1.12rem;letter-spacing:.02em;word-break:break-word}
-  .file-tag{
-    margin-top:6px;display:inline-flex;align-items:center;gap:6px;
-    font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
-    color:var(--green);background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.25);
-    padding:3px 9px;border-radius:999px;
-  }
+  .file-tag{margin-top:6px;display:inline-flex;align-items:center;gap:6px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--green);background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.25);padding:3px 9px;border-radius:999px}
   .file-tag svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-
-  /* ---------- Steps ---------- */
   .steps{position:relative;padding:2px 0 0}
   .steps-line{position:absolute;left:19px;right:19px;top:17px;height:4px;border-radius:4px;background:rgba(120,150,200,.14);overflow:hidden}
-  .steps-fill{
-    position:relative;height:100%;width:0;border-radius:4px;
-    background:linear-gradient(90deg,var(--blue),var(--cyan));
-    box-shadow:0 0 14px var(--cyan);
-    transition:width .9s cubic-bezier(.22,1,.36,1);
-  }
-  .steps-fill::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
-    transform:translateX(-100%);animation:shine 2.4s ease-in-out infinite;
-  }
+  .steps-fill{position:relative;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan));box-shadow:0 0 14px var(--cyan);transition:width .9s cubic-bezier(.22,1,.36,1)}
+  .steps-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);transform:translateX(-100%);animation:shine 2.4s ease-in-out infinite}
   @keyframes shine{to{transform:translateX(100%)}}
   .steps ol{list-style:none;display:flex;justify-content:space-between;position:relative}
-  .steps li{
-    width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
-    font-weight:800;font-size:.85rem;color:var(--muted);
-    background:var(--surface-solid);border:2px solid rgba(120,150,200,.2);
-    transition:all .4s ease;
-  }
+  .steps li{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;color:var(--muted);background:var(--surface-solid);border:2px solid rgba(120,150,200,.2);transition:all .4s ease}
   .steps li svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
   .steps li.done{color:#021018;background:linear-gradient(145deg,var(--cyan),var(--blue));border-color:transparent;box-shadow:0 0 14px rgba(0,229,255,.55)}
   .steps li.active{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 0 4px rgba(0,229,255,.1),0 0 18px rgba(0,229,255,.55);animation:glow 2s ease-in-out infinite}
   @keyframes glow{50%{box-shadow:0 0 0 7px rgba(0,229,255,.04),0 0 8px rgba(0,229,255,.3)}}
-
-  /* ---------- Action ---------- */
   .action{display:flex;flex-direction:column;align-items:center;gap:16px;padding:26px 20px 24px}
   .step-label{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.74rem;letter-spacing:.26em;text-transform:uppercase}
   .step-label b{color:var(--text);font-weight:800}
   .step-label::before,.step-label::after{content:"";width:28px;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.6))}
   .step-label::after{transform:scaleX(-1)}
-
-  .btn{
-    position:relative;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    width:100%;min-height:58px;padding:14px 20px;border:0;border-radius:16px;
-    text-decoration:none;cursor:pointer;font:inherit;font-weight:800;font-size:1rem;
-    letter-spacing:.14em;text-transform:uppercase;color:#02121a;
-    background:linear-gradient(95deg,var(--cyan),var(--blue));
-    box-shadow:0 0 0 1px rgba(255,255,255,.12) inset, 0 10px 30px rgba(41,121,255,.35), 0 0 28px rgba(0,229,255,.35);
-    transition:transform .18s ease, filter .2s ease, box-shadow .2s ease;
-  }
-  .btn::before{
-    content:"";position:absolute;top:0;bottom:0;width:60%;left:-80%;
-    background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
-    transform:skewX(-20deg);animation:sweep 3.2s ease-in-out infinite;
-  }
+  .btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;padding:14px 20px;border:0;border-radius:16px;text-decoration:none;cursor:pointer;font:inherit;font-weight:800;font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:#02121a;background:linear-gradient(95deg,var(--cyan),var(--blue));box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 10px 30px rgba(41,121,255,.35),0 0 28px rgba(0,229,255,.35);transition:transform .18s ease,filter .2s ease,box-shadow .2s ease}
+  .btn::before{content:"";position:absolute;top:0;bottom:0;width:60%;left:-80%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:sweep 3.2s ease-in-out infinite}
   @keyframes sweep{60%,100%{left:140%}}
   .btn:hover{filter:brightness(1.1);transform:translateY(-2px)}
   .btn:active{transform:translateY(1px) scale(.99)}
@@ -189,242 +77,94 @@
   .btn.loading::before{display:none}
   .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(2,18,26,.25);border-top-color:#02121a;animation:rot .8s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
-
-  /* ---------- Toast ---------- */
-  .toast{
-    position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
-    transform:translate(-50%,30px);opacity:0;pointer-events:none;
-    background:rgba(20,28,44,.96);border:1px solid var(--cyan);color:var(--text);
-    padding:11px 18px;border-radius:14px;font-size:.85rem;max-width:calc(100% - 32px);
-    box-shadow:0 0 26px rgba(0,229,255,.3);
-    transition:all .3s ease;z-index:50;
-  }
+  .toast{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;pointer-events:none;background:rgba(20,28,44,.96);border:1px solid var(--cyan);color:var(--text);padding:11px 18px;border-radius:14px;font-size:.85rem;max-width:calc(100% - 32px);box-shadow:0 0 26px rgba(0,229,255,.3);transition:all .3s ease;z-index:50}
   .toast.show{opacity:1;transform:translate(-50%,0)}
-
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation:none !important;transition:none !important}
-  }
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
 </style>
 </head>
-
 <body>
-<div class="bg" aria-hidden="true">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="grid"></div><div class="scan"></div>
-</div>
-
+<div class="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div><div class="scan"></div></div>
 <div class="wrap">
-
   <div class="topbar">
-    <span class="secure">
-      <svg viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
-      Secure
-    </span>
+    <span class="secure"><svg viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>Secure</span>
     <span class="live"><i></i>Protected</span>
   </div>
-
-  <!-- [EDIT HERE] TOP AD BANNER - paste your ad code inside this div -->
   <div class="ad-slot" id="adTop">Ad</div>
-
   <section class="card file">
-    <div class="shield" aria-hidden="true">
-      <div class="shield-core">
-        <svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.6v6c0 4.7 3.2 8.4 8 9.9 4.8-1.5 8-5.2 8-9.9v-6l-8-3.1Z"/><path d="m8.6 12.1 2.4 2.4 4.4-4.6"/></svg>
-      </div>
-    </div>
-    <div class="file-text">
-      <div class="file-name" id="fileName">Free_Fire_Panel</div>
-      <span class="file-tag">
-        <svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-        Verified
-      </span>
-    </div>
+    <div class="shield" aria-hidden="true"><div class="shield-core"><svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.6v6c0 4.7 3.2 8.4 8 9.9 4.8-1.5 8-5.2 8-9.9v-6l-8-3.1Z"/><path d="m8.6 12.1 2.4 2.4 4.4-4.6"/></svg></div></div>
+    <div class="file-text"><div class="file-name" id="fileName">Free_Fire_Panel</div><span class="file-tag"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Verified</span></div>
   </section>
-
-  <section class="card">
-    <div class="steps">
-      <div class="steps-line"><div class="steps-fill" id="stepsFill"></div></div>
-      <ol id="stepList"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol>
-    </div>
-  </section>
-
-  <section class="card action">
-    <div class="step-label" id="stepLabel">Step <b>1</b> / 5</div>
-    <a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a>
-  </section>
-
-  <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
+  <section class="card"><div class="steps"><div class="steps-line"><div class="steps-fill" id="stepsFill"></div></div><ol id="stepList"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol></div></section>
+  <section class="card action"><div class="step-label" id="stepLabel">Step <b>1</b> / 5</div><a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a></section>
   <div class="ad-slot" id="adBottom">Ad</div>
 </div>
-
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
 (function () {
   'use strict';
-
-  /* =====================================================================
-     [EDIT HERE] SETTINGS
-     ===================================================================== */
-
-  // [EDIT HERE] PASTE LOOTLABS LINKS HERE
   const lootlabsLinks = {
-    1: 'https://loot-link.com/s?SZefrRQU&data=uYOYLUpcMxSf6y2DZ6F2xv88Lcfkae57NH%2BCFa4zyvfUOnGLSysbKe/ageRwh7bFQlufcGOez/MAjmgf2tmVXw%3D%3D',
-    2: 'https://loot-link.com/s?SZefrRQU&data=uYOYLUpcMxSf6y2DZ6F2xv88Lcfkae57NH%2BCFa4zyveSKw2htC8ARjl7fH4iegPY1c51V7JsPu5W5wTdQBBSFg%3D%3D',
-    3: 'https://loot-link.com/s?SZefrRQU&data=uYOYLUpcMxSf6y2DZ6F2xv88Lcfkae57NH%2BCFa4zyvfOFbUlPRjlfw7bKPEnnVNvrCaEjyw6r5irHrjXB7jGJg%3D%3D',
-    4: 'https://loot-link.com/s?SZefrRQU&data=uYOYLUpcMxSf6y2DZ6F2xv88Lcfkae57NH%2BCFa4zyvezgBGB9wqUCb4zAU3RHMtd0rYrpYTuKQKB6Plp5ZlHjQ%3D%3D'
+    1: 'https://loot-link.com/s?SZefrRQU&data=J/INd2pvDHjPb2R4/WwSLryYROCGL1mPC/ewjhb8wJ8bNPnd8apZHw%2BVwPzoID15',
+    2: 'https://loot-link.com/s?SZefrRQU&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0Fa0H5lszLyTGOZVajr6QhJ',
+    3: 'https://loot-link.com/s?SZefrRQU&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0Gt%2BCS9lrdvLdc355MOqyE1',
+    4: 'https://loot-link.com/s?SZefrRQU&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0GxZNckuHXdoETXuWVzZRGI'
   };
-
-  // [EDIT HERE] PASTE YOUR REAL DOWNLOAD LINK HERE (button on Step 5)
-  // ⚠️ এখানে আপনার আসল ডাউনলোড লিংকটি বসাতে ভুলবেন না (যেমন: Mega, Mediafire বা Google Drive এর লিংক)
   const FINAL_DOWNLOAD_LINK = 'https://mega.nz/your-actual-file-link';
-
-  // [EDIT HERE] File name shown on the card
   const FILE_NAME = 'Free_Fire_Panel';
-
-  // [EDIT HERE] Any random text. Used to sign saved progress so hand-edited
-  // localStorage is detected and reset. Change it to something of your own.
   const SECRET_SALT = 'change-me-7f3a9c';
-
-  // Minimum seconds between clicking START and a valid return from Lootlabs.
-  // Stops someone from typing ?step=2 right after clicking. Set 0 to disable.
   const MIN_AWAY_SECONDS = 10;
-
-  /* ===================== END OF SETTINGS ===================== */
-
   var TOTAL_STEPS = 5;
   var STORAGE_KEY = 'safelink_progress_v3';
   var CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-
   var $ = function (id) { return document.getElementById(id); };
   var stepItems = $('stepList').children;
   var btn = $('mainBtn');
   $('fileName').textContent = FILE_NAME;
-
-  // ---------- Tiny signed storage (cyrb53 hash) ----------
   function hash(str) {
     var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (var i = 0, ch; i < str.length; i++) {
-      ch = str.charCodeAt(i);
-      h1 = Math.imul(h1 ^ ch, 2654435761);
-      h2 = Math.imul(h2 ^ ch, 1597334677);
-    }
+    for (var i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
     h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
     return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
   }
   function sign(step, pendingAt) { return hash(step + '|' + pendingAt + '|' + SECRET_SALT); }
-
-  // state: { step: 1..5, pendingAt: timestamp of last START click (0 = none) }
   var state = loadState();
-
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS &&
-          typeof s.pendingAt === 'number' && s.sig === sign(s.step, s.pendingAt)) {
-        return { step: s.step, pendingAt: s.pendingAt };
-      }
+      if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS && typeof s.pendingAt === 'number' && s.sig === sign(s.step, s.pendingAt)) return { step: s.step, pendingAt: s.pendingAt };
     } catch (e) {}
     return { step: 1, pendingAt: 0 };
   }
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        step: state.step, pendingAt: state.pendingAt, sig: sign(state.step, state.pendingAt)
-      }));
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({step:state.step,pendingAt:state.pendingAt,sig:sign(state.step,state.pendingAt)})); } catch (e) {}
   }
-
-  function isConfigured(url) {
-    return typeof url === 'string' && /^https?:\/\//i.test(url) && !/PASTE/i.test(url) && !/your-actual-file-link/i.test(url);
-  }
-
+  function isConfigured(url) { return typeof url === 'string' && /^https?:\/\//i.test(url) && !/PASTE/i.test(url) && !/your-actual-file-link/i.test(url); }
   var toastTimer;
-  function toast(msg) {
-    var t = $('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
-  }
-
-  function setLoading(on) {
-    if (on) {
-      btn.classList.add('loading');
-      btn.innerHTML = '<span class="spinner"></span>Connecting';
-    } else {
-      btn.classList.remove('loading');
-    }
-  }
-
-  // ---------- Render ----------
+  function toast(msg) { var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('show');},3000); }
+  function setLoading(on) { if(on){btn.classList.add('loading');btn.innerHTML='<span class="spinner"></span>Connecting';}else{btn.classList.remove('loading');} }
   function render() {
-    for (var i = 0; i < TOTAL_STEPS; i++) {
-      var n = i + 1;
-      stepItems[i].className = n < state.step ? 'done' : (n === state.step ? 'active' : '');
-      if (n < state.step) stepItems[i].innerHTML = CHECK_SVG; else stepItems[i].textContent = String(n);
-    }
-    $('stepsFill').style.width = ((state.step - 1) / (TOTAL_STEPS - 1) * 100) + '%';
-    $('stepLabel').innerHTML = 'Step <b>' + state.step + '</b> / ' + TOTAL_STEPS;
-
+    for(var i=0;i<TOTAL_STEPS;i++){var n=i+1;stepItems[i].className=n<state.step?'done':(n===state.step?'active':'');if(n<state.step)stepItems[i].innerHTML=CHECK_SVG;else stepItems[i].textContent=String(n);}
+    $('stepsFill').style.width=((state.step-1)/(TOTAL_STEPS-1)*100)+'%';
+    $('stepLabel').innerHTML='Step <b>'+state.step+'</b> / '+TOTAL_STEPS;
     setLoading(false);
-    if (state.step === TOTAL_STEPS) {
-      btn.textContent = '\uD83D\uDD13 GET DOWNLOAD LINK';
-      btn.classList.add('final');
-      btn.href = isConfigured(FINAL_DOWNLOAD_LINK) ? FINAL_DOWNLOAD_LINK : '#';
-    } else {
-      btn.textContent = 'Start';
-      btn.classList.remove('final');
-      var link = lootlabsLinks[state.step];
-      btn.href = isConfigured(link) ? link : '#';
-    }
-
-    // keep the URL in sync so a refresh stays on the same step
-    try { history.replaceState(null, '', '?step=' + state.step); } catch (e) {}
+    if(state.step===TOTAL_STEPS){btn.textContent='\uD83D\uDD13 GET DOWNLOAD LINK';btn.classList.add('final');btn.href=isConfigured(FINAL_DOWNLOAD_LINK)?FINAL_DOWNLOAD_LINK:'#';}
+    else{btn.textContent='Start';btn.classList.remove('final');var link=lootlabsLinks[state.step];btn.href=isConfigured(link)?link:'#';}
+    try{history.replaceState(null,'','?step='+state.step);}catch(e){}
   }
-
-  // ---------- Click: go to Lootlabs (or the final download) ----------
-  btn.addEventListener('click', function (e) {
-    var isFinal = state.step === TOTAL_STEPS;
-    var url = isFinal ? FINAL_DOWNLOAD_LINK : lootlabsLinks[state.step];
-    if (!isConfigured(url)) {
-      e.preventDefault();
-      toast('লিংক সেট করা হয়নি! কোডের ভেতরে লিংকগুলো চেক করুন।');
-      return;
-    }
-    if (!isFinal) {
-      state.pendingAt = Date.now(); // saved BEFORE leaving the page
-      saveState();
-      setLoading(true);
-    }
+  btn.addEventListener('click',function(e){
+    var isFinal=state.step===TOTAL_STEPS;var url=isFinal?FINAL_DOWNLOAD_LINK:lootlabsLinks[state.step];
+    if(!isConfigured(url)){e.preventDefault();toast('লিংক সেট করা হয়নি! কোডের ভেতরে লিংকগুলো চেক করুন।');return;}
+    if(!isFinal){state.pendingAt=Date.now();saveState();setLoading(true);}
   });
-
-  // ---------- Return from Lootlabs: ?step=N ----------
-  // The next step unlocks only if the user really clicked START on the current step
-  // and the URL asks for exactly the next step. Typing ?step=5 does nothing.
-  function handleReturn() {
-    var q = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    if (!q || q !== state.step + 1 || !state.pendingAt) return;
-    if (Date.now() - state.pendingAt >= MIN_AWAY_SECONDS * 1000) {
-      state.step += 1;
-      state.pendingAt = 0;
-      saveState();
-    } else {
-      toast('অনুগ্রহ করে Lootlabs-এর টাস্ক কমপ্লিট করুন।');
-    }
+  function handleReturn(){
+    var q=parseInt(new URLSearchParams(location.search).get('step'),10);
+    if(!q||q!==state.step+1||!state.pendingAt)return;
+    if(Date.now()-state.pendingAt>=MIN_AWAY_SECONDS*1000){state.step+=1;state.pendingAt=0;saveState();}
+    else{toast('অনুগ্রহ করে Lootlabs-এর টাস্ক কমপ্লিট করুন।');}
   }
-
-  function init() {
-    state = loadState();
-    handleReturn();
-    render();
-  }
-
-  // back button (bfcache) and other tabs
-  window.addEventListener('pageshow', function (e) { if (e.persisted) init(); });
-  window.addEventListener('storage', function (e) { if (e.key === STORAGE_KEY) init(); });
-
+  function init(){state=loadState();handleReturn();render();}
+  window.addEventListener('pageshow',function(e){if(e.persisted)init();});
+  window.addEventListener('storage',function(e){if(e.key===STORAGE_KEY)init();});
   init();
 })();
 </script>
