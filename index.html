@@ -1,28 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <title>SR PANEL ZONE</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 15%,#263d66 0,transparent 38%),linear-gradient(145deg,#0b1220,#111827 65%,#172554);color:#f8fafc;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    main{width:min(100%,620px);padding:clamp(28px,7vw,56px);border:1px solid #ffffff24;border-radius:28px;background:#ffffff0d;box-shadow:0 24px 80px #0005;backdrop-filter:blur(18px);text-align:center}
-    .tag{display:inline-block;padding:7px 12px;border:1px solid #60a5fa55;border-radius:999px;color:#93c5fd;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-    h1{margin:22px 0 12px;font-size:clamp(36px,8vw,58px);line-height:1.05;letter-spacing:-.04em}
-    p{margin:0;color:#cbd5e1;line-height:1.7;font-size:16px}
-    .status{display:inline-flex;align-items:center;gap:9px;margin-top:28px;padding:10px 15px;border-radius:999px;background:#16a34a20;color:#86efac;font-size:14px}
-    .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 12px #4ade80}
-    footer{margin-top:34px;color:#94a3b8;font-size:12px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e14">
+<title>Secure Download Zone</title>
+<style>
+:root{--c1:#00f2fe;--c2:#4facfe;--bg:#0b0e14;--card:#1a202c}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b0e14;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{position:relative;isolation:isolate;overflow:hidden;min-height:100vh;padding:30px 14px 45px;display:flex;align-items:center;justify-content:center;background:radial-gradient(1000px 550px at 50% -10%,#17243b,var(--bg) 65%)}
+.blob{position:absolute;z-index:-1;width:350px;height:350px;border-radius:50%;filter:blur(90px);opacity:.18;animation:float 14s ease-in-out infinite alternate}.b1{background:var(--c1);top:-120px;left:-130px}.b2{background:#6a5cff;right:-130px;bottom:-150px;animation-delay:-6s}
+@keyframes float{to{transform:translate(55px,40px) scale(1.15)}}
+main{width:min(100%,470px);text-align:center}.brand{display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:5px}.shield{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(45deg,var(--c1),var(--c2));color:#06202b;font-size:21px;box-shadow:0 0 22px #00f2fe66}
+h1{font-size:clamp(19px,5vw,25px);letter-spacing:2px;margin:0;background:linear-gradient(45deg,var(--c1),var(--c2),#b6a3ff);background-clip:text;-webkit-background-clip:text;color:transparent}
+.tag{margin:0 0 22px;color:#718096;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.frame{padding:1.5px;border-radius:22px;overflow:hidden;background:conic-gradient(from 0deg,transparent,var(--c1),transparent,var(--c2),transparent);box-shadow:0 20px 60px #0009}
+.card{border-radius:21px;padding:26px 20px 22px;background:linear-gradient(180deg,#1c2434,var(--card));}
+.steps{display:flex;justify-content:center;align-items:center;margin:0 0 19px}.step{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#0b0e14;border:2px solid #2d3748;color:#718096;font-size:12px;font-weight:700}.step.active{background:linear-gradient(45deg,var(--c1),var(--c2));border-color:var(--c1);color:#0b0e14;box-shadow:0 0 15px #00f2fe66}.step.done{border-color:var(--c1);color:var(--c1)}.line{height:2px;width:27px;background:#2d3748}.line.done{background:linear-gradient(90deg,var(--c1),var(--c2))}
+h2{font-size:24px;margin:0 0 5px}.sub{font-size:13px;color:#a0aec0;margin:0 0 18px}
+.file{display:flex;align-items:center;gap:12px;text-align:left;padding:12px;margin-bottom:16px;border-radius:14px;background:#0b0e14a6;border:1px solid #4facfe30}.fileicon{width:43px;height:43px;border-radius:12px;display:grid;place-items:center;background:#00f2fe18;border:1px solid #00f2fe55;font-size:21px}.filename{font-size:14px;font-weight:700}.filesub{font-size:11px;color:#718096}.badge{margin-left:auto;color:var(--c1);font-size:10px;border:1px solid #00f2fe66;border-radius:20px;padding:4px 8px}
+.ad{min-height:74px;margin:0 0 16px;border:1px dashed #ffffff25;border-radius:12px;display:grid;place-items:center;color:#64748b;font-size:11px;letter-spacing:1px}
+.panel{display:none;margin-bottom:16px;padding:16px 14px;border-radius:16px;background:#0b0e14b3;border:1px solid #4facfe30;animation:rise .4s ease}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ringbox{position:relative;width:132px;height:132px;margin:0 auto 10px}.ringbox svg{width:132px;height:132px;transform:rotate(-90deg)}.ringbg,.ringfg{fill:none;stroke-width:9}.ringbg{stroke:#232c3d}.ringfg{stroke:url(#grad);stroke-linecap:round;transition:stroke-dashoffset .8s linear;filter:drop-shadow(0 0 6px #00f2feaa)}.ringtxt{position:absolute;inset:0;display:grid;align-content:center;justify-items:center}.num{font-size:36px;font-weight:800;line-height:1}.pct{font-size:11px;color:#718096;margin-top:5px;letter-spacing:1px}
+.status{font-size:13px;color:#cbd5e0;margin:0 0 10px;min-height:20px}.checks{list-style:none;padding:0;margin:0;text-align:left}.checks li{display:flex;gap:10px;align-items:center;padding:7px 3px;color:#64748b;font-size:12px}.ico{width:19px;height:19px;border-radius:50%;border:2px solid #2d3748;display:grid;place-items:center;flex:none;font-size:11px}.checks li.done{color:#a0aec0}.checks li.done .ico{background:linear-gradient(45deg,var(--c1),var(--c2));border:0;color:#0b0e14}.checks li.active{color:#fff}.checks li.active .ico{border-color:var(--c1);border-top-color:transparent;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+button,.continue{display:block;width:100%;padding:15px 12px;border:0;border-radius:14px;background:linear-gradient(45deg,var(--c1),var(--c2));color:#06202b;font:800 15px system-ui;text-decoration:none;cursor:pointer;box-shadow:0 0 20px #00f2fe55}button:disabled{opacity:.75;cursor:wait}.continue{display:none;color:white;background:linear-gradient(45deg,#00a9d6,#6a5cff);margin-top:0}.note{margin:13px 0 0;color:#718096;font-size:11px}.bottom{margin:18px 0 0}
+@media(min-width:600px){.card{padding:32px 30px 26px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <main>
-    <span class="tag">Welcome</span>
-    <h1>SR PANEL ZONE</h1>
-    <p>Your Cloudflare Pages site is now being set up. This is the starter homepage; your panel interface can be added here next.</p>
-    <div class="status"><span class="dot"></span> Pages deployment setup</div>
-    <footer>Powered by Cloudflare Pages</footer>
-  </main>
-</body>
-</html>
+<div id="app"><div class="blob b1"></div><div class="blob b2"></div>
+<main>
+<div class="brand"><div class="shield">⛨</div><h1>SECURE DOWNLOAD ZONE</h1></div>
+<p class="tag">Protected Link Gateway</p>
+<div class="frame"><section class="card">
+<div class="steps" id="steps"></div>
+<h2 id="title">Step 1</h2><p class="sub" id="subtitle">Step 1 of 5 · Continue when the timer finishes</p>
+<div class="file"><div class="fileicon">⇩</div><div><div class="filename">Your download is ready</div><div class="filesub">Secure link gateway</div></div><span class="badge">READY</span></div>
+<div class="ad">ADVERTISEMENT SPACE</div>
+<div class="panel" id="panel">
+<div class="ringbox"><svg viewBox="0 0 132 132"><defs><linearGradient id="grad"><stop stop-color="#00f2fe"/><stop offset="1" stop-color="#4facfe"/></linearGradient></defs><circle class="ringbg" cx="66" cy="66" r="54"/><circle class="ringfg" id="ring" cx="66" cy="66" r="54"/></svg><div class="ringtxt"><div class="num" id="num">15</div><div class="pct" id="pct">0%</div></div></div>
+<p class="status" id="status">Please wait while the timer runs…</p>
+<ul class="checks" id="checks"><li><span class="ico"></span>Waiting period in progress</li><li><span class="ico"></span>Preparing the next step</li><li><span class="ico"></span>Almost ready</li><li><span class="ico"></span>Complete</li></ul>
+</div>
+<button id="start" type="button">Continue · Wait 15 seconds</button>
+<a class="continue" id="continue" href="https://example.com/next-page" rel="nofollow">CONTINUE TO NEXT STEP →</a>
+<p class="note" id="note">This page uses a simple countdown; it does not perform a security scan.</p>
+</section></div>
+<div class="ad bottom">ADVERTISEMENT SPACE</div>
+</main></div>
+<script>
+(function(){
+const TIMER=15,CURRENT_STEP=1,TOTAL_STEPS=5,NEXT_URL="https://example.com/next-page";
+const $=id=>document.getElementById(id),steps=$("steps"),checks=[...$("checks").children],start=$("start"),next=$("continue"),panel=$("panel"),ring=$("ring");
+next.href=NEXT_URL;$("title").textContent="Step "+CURRENT_STEP;$("subtitle").textContent="Step "+CURRENT_STEP+" of "+TOTAL_STEPS+" · Please wait to continue";start.textContent="👉 Click here and wait "+TIMER+" seconds 👈";$("num").textContent=TIMER;
+const dots=[],lines=[];for(let i=1;i<=TOTAL_STEPS;i++){let d=document.createElement("span");d.className="step";d.textContent=i;steps.append(d);dots.push(d);if(i<TOTAL_STEPS){let l=document.createElement("i");l.className="line";steps.append(l);lines.push(l)}}
+function paint(done){dots.forEach((d,i)=>{d.className="step"+(i+1<CURRENT_STEP||done&&i+1===CURRENT_STEP?" done":i+1===CURRENT_STEP?" active":"");if(i+1<CURRENT_STEP||done&&i+1===CURRENT_STEP)d.textContent="✓"});lines.forEach((l,i)=>l.className="line"+(i+1<CURRENT_STEP||done&&i+1===CURRENT_STEP?" done":""))}paint(false);
+const C=2*Math.PI*54;ring.style.strokeDasharray=C;ring.style.strokeDashoffset=C;
+let left=TIMER,interval=null;
+function update(){let elapsed=TIMER-left;$("num").textContent=left;$("pct").textContent=Math.round(elapsed/TIMER*100)+"%";ring.style.strokeDashoffset=C*(1-elapsed/TIMER);let active=Math.min(3,Math.floor(elapsed/TIMER*4));checks.forEach((li,i)=>{li.className=i<active?"done":i===active?"active":"";li.querySelector(".ico").textContent=i<active?"✓":""});$("status").textContent=["Waiting period in progress…","Preparing the next step…","Almost ready…","Finishing up…"][active]}
+start.addEventListener("click",()=>{if(interval)return;start.disabled=true;panel.style.display="block";update();interval=setInterval(()=>{left--;if(left>0)update();else{clearInterval(interval);interval=null;$("num").textContent="✓";$("pct").textContent="100%";ring.style.strokeDashoffset=0;checks.forEach(li=>{li.className="done";li.querySelector(".ico").textContent="✓"});$("status").textContent="Timer complete. You can continue.";start.style.display="none";next.style.display="block";$("note").textContent="Click the button above to continue.";paint(true)}},1000)});
+})();
+</script>
+</body></html>
