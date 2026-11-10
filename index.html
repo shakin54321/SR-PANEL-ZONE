@@ -313,9 +313,14 @@
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
     return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
   }
-  function sign(step, pendingAt, savedAt) { return hash(step + '|' + pendingAt + '|' + savedAt + '|' + SECRET_SALT); }
+  function sign(step, pendingAt, savedAt, awayAt) {
+    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + awayAt + '|' + SECRET_SALT);
+  }
+  function legacySign(step, pendingAt, savedAt) {
+    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + SECRET_SALT);
+  }
 
-  // Progress is kept separately in each visitor's browser for 5 minutes.
+  // Each visitor's 5-minute timer pauses while they are away on Lootlabs.
   var SAVE_TTL_MS = 5 * 60 * 1000;
   var state = loadState();
 
@@ -323,22 +328,37 @@
     try {
       var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS &&
-          typeof s.pendingAt === 'number' && typeof s.savedAt === 'number' &&
-          Date.now() - s.savedAt >= 0 && Date.now() - s.savedAt < SAVE_TTL_MS &&
-          s.sig === sign(s.step, s.pendingAt, s.savedAt)) {
-        return { step: s.step, pendingAt: s.pendingAt, savedAt: s.savedAt };
+          typeof s.pendingAt === 'number' && typeof s.savedAt === 'number') {
+        var awayAt = typeof s.awayAt === 'number' ? s.awayAt : 0;
+        var validSignature = s.sig === sign(s.step, s.pendingAt, s.savedAt, awayAt) ||
+          (!awayAt && s.sig === legacySign(s.step, s.pendingAt, s.savedAt));
+        var age = Date.now() - s.savedAt;
+        var validAge = age >= 0 && (awayAt > 0 ? awayAt <= Date.now() : age < SAVE_TTL_MS);
+        if (validSignature && validAge) {
+          return { step: s.step, pendingAt: s.pendingAt, savedAt: s.savedAt, awayAt: awayAt };
+        }
       }
     } catch (e) {}
-    return { step: 1, pendingAt: 0, savedAt: 0 };
+    return { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
   }
-  function saveState() {
+  function persistState() {
     try {
-      state.savedAt = Date.now();
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         step: state.step, pendingAt: state.pendingAt, savedAt: state.savedAt,
-        sig: sign(state.step, state.pendingAt, state.savedAt)
+        awayAt: state.awayAt, sig: sign(state.step, state.pendingAt, state.savedAt, state.awayAt)
       }));
     } catch (e) {}
+  }
+  function saveState() {
+    state.savedAt = Date.now();
+    persistState();
+  }
+  function resumeTimerAfterAway() {
+    if (!state.awayAt) return;
+    var awayDuration = Date.now() - state.awayAt;
+    if (awayDuration >= 0) state.savedAt += awayDuration;
+    state.awayAt = 0;
+    persistState();
   }
 
   function isConfigured(url) {
@@ -404,6 +424,7 @@
       saveState();
     } else {
       state.pendingAt = Date.now(); // saved BEFORE leaving the page
+      state.awayAt = Date.now(); // pause the 5-minute timer while on Lootlabs
       saveState();
       setLoading(true);
     }
@@ -426,6 +447,7 @@
 
   function init() {
     state = loadState();
+    resumeTimerAfterAway();
     handleReturn();
     render();
   }
