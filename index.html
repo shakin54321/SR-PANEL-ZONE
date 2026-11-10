@@ -313,25 +313,30 @@
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
     return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
   }
-  function sign(step, pendingAt) { return hash(step + '|' + pendingAt + '|' + SECRET_SALT); }
+  function sign(step, pendingAt, savedAt) { return hash(step + '|' + pendingAt + '|' + savedAt + '|' + SECRET_SALT); }
 
-  // state: { step: 1..5, pendingAt: timestamp of last START click (0 = none) }
+  // Progress is kept separately in each visitor's browser for 5 minutes.
+  var SAVE_TTL_MS = 5 * 60 * 1000;
   var state = loadState();
 
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS &&
-          typeof s.pendingAt === 'number' && s.sig === sign(s.step, s.pendingAt)) {
-        return { step: s.step, pendingAt: s.pendingAt };
+          typeof s.pendingAt === 'number' && typeof s.savedAt === 'number' &&
+          Date.now() - s.savedAt >= 0 && Date.now() - s.savedAt < SAVE_TTL_MS &&
+          s.sig === sign(s.step, s.pendingAt, s.savedAt)) {
+        return { step: s.step, pendingAt: s.pendingAt, savedAt: s.savedAt };
       }
     } catch (e) {}
-    return { step: 1, pendingAt: 0 };
+    return { step: 1, pendingAt: 0, savedAt: 0 };
   }
   function saveState() {
     try {
+      state.savedAt = Date.now();
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        step: state.step, pendingAt: state.pendingAt, sig: sign(state.step, state.pendingAt)
+        step: state.step, pendingAt: state.pendingAt, savedAt: state.savedAt,
+        sig: sign(state.step, state.pendingAt, state.savedAt)
       }));
     } catch (e) {}
   }
@@ -393,7 +398,11 @@
       toast('লিংক সেট করা হয়নি! কোডের ভেতরে লিংকগুলো চেক করুন।');
       return;
     }
-    if (!isFinal) {
+    if (isFinal) {
+      // Reset this visitor's saved progress when they click the final download.
+      state = { step: 1, pendingAt: 0, savedAt: 0 };
+      saveState();
+    } else {
       state.pendingAt = Date.now(); // saved BEFORE leaving the page
       saveState();
       setLoading(true);
