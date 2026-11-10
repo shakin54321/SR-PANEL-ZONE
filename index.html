@@ -251,6 +251,7 @@
   <section class="card action">
     <div class="step-label" id="stepLabel">Step <b>1</b> / 5</div>
     <a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a>
+    <a class="btn final" id="secondDownloadBtn" href="#" rel="noopener noreferrer" hidden>Kurama Mods V2.0 Latest</a>
   </section>
 
   <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
@@ -278,6 +279,7 @@
   // [EDIT HERE] PASTE YOUR REAL DOWNLOAD LINK HERE (button on Step 5)
   // ⚠️ এখানে আপনার আসল ডাউনলোড লিংকটি বসাতে ভুলবেন না (যেমন: Mega, Mediafire বা Google Drive এর লিংক)
   const FINAL_DOWNLOAD_LINK = 'https://loadly.io/dnrix0Cb';
+  const SECOND_DOWNLOAD_LINK = 'https://loadly.io/UfQocyB2';
 
   // [EDIT HERE] File name shown on the card
   const FILE_NAME = 'Free_Fire_Panel';
@@ -299,6 +301,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var stepItems = $('stepList').children;
   var btn = $('mainBtn');
+  var secondBtn = $('secondDownloadBtn');
   $('fileName').textContent = FILE_NAME;
 
   // ---------- Tiny signed storage (cyrb53 hash) ----------
@@ -419,22 +422,26 @@
 
     setLoading(false);
     if (state.step === TOTAL_STEPS) {
-      btn.textContent = '\uD83D\uDD13 GET DOWNLOAD LINK';
+      btn.textContent = 'XYX V2.4 Still working';
       btn.classList.add('final');
       btn.href = isConfigured(FINAL_DOWNLOAD_LINK) ? FINAL_DOWNLOAD_LINK : '#';
+      secondBtn.hidden = false;
+      secondBtn.href = isConfigured(SECOND_DOWNLOAD_LINK) ? SECOND_DOWNLOAD_LINK : '#';
     } else {
       btn.textContent = 'Start';
       btn.classList.remove('final');
       var link = lootlabsLinks[state.step];
       btn.href = isConfigured(link) ? link : '#';
+      secondBtn.hidden = true;
+      secondBtn.href = '#';
     }
 
     // keep the URL in sync so a refresh stays on the same step
     try { history.replaceState(null, '', '?step=' + state.step); } catch (e) {}
   }
 
-  // ---------- Click: go to Lootlabs (or the final download) ----------
-  btn.addEventListener('click', function (e) {
+  // ---------- Click: Lootlabs steps and one-choice final download ----------
+  function handleMainButtonClick(e) {
     var isFinal = state.step === TOTAL_STEPS;
     var url = isFinal ? FINAL_DOWNLOAD_LINK : lootlabsLinks[state.step];
     if (!isConfigured(url)) {
@@ -443,8 +450,10 @@
       return;
     }
     if (isFinal) {
-      // Reset this visitor's saved progress when they click the final download.
-      state = { step: 1, pendingAt: 0, savedAt: 0 };
+      // One completed run allows exactly one panel choice.
+      btn.style.pointerEvents = 'none';
+      secondBtn.style.pointerEvents = 'none';
+      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
       saveState();
     } else {
       state.pendingAt = Date.now(); // saved BEFORE leaving the page
@@ -452,6 +461,25 @@
       saveState();
       setLoading(true);
     }
+  }
+  btn.addEventListener('click', handleMainButtonClick);
+
+  secondBtn.addEventListener('click', function (e) {
+    if (state.step !== TOTAL_STEPS) {
+      e.preventDefault();
+      toast('দুটি Download option পেতে আগে ৫টি Step complete করুন।');
+      return;
+    }
+    if (!isConfigured(SECOND_DOWNLOAD_LINK)) {
+      e.preventDefault();
+      toast('দ্বিতীয় Download link সেট করা হয়নি।');
+      return;
+    }
+    // Lock both choices and reset progress before opening the selected panel.
+    btn.style.pointerEvents = 'none';
+    secondBtn.style.pointerEvents = 'none';
+    state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+    saveState();
   });
 
   // ---------- Return from Lootlabs: ?step=N ----------
