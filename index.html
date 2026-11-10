@@ -421,6 +421,8 @@
     $('stepLabel').innerHTML = 'Step <b>' + state.step + '</b> / ' + TOTAL_STEPS;
 
     setLoading(false);
+    btn.style.pointerEvents = '';
+    secondBtn.style.pointerEvents = '';
     if (state.step === TOTAL_STEPS) {
       btn.textContent = 'XYX V2.4 Still working';
       btn.classList.add('final');
