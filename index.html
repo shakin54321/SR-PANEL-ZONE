@@ -504,6 +504,8 @@
     resumeTimerAfterAway();
     handleReturn();
     render();
+    // Start the five-minute expiry timer for progress restored from storage too.
+    scheduleExpiry();
   }
 
   // back button (bfcache) and other tabs
