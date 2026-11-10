@@ -322,6 +322,7 @@
 
   // Each visitor's 5-minute timer pauses while they are away on Lootlabs.
   var SAVE_TTL_MS = 5 * 60 * 1000;
+  var expiryTimer = null;
   var state = loadState();
 
   function loadState() {
@@ -349,9 +350,31 @@
       }));
     } catch (e) {}
   }
+  function scheduleExpiry() {
+    if (expiryTimer) clearTimeout(expiryTimer);
+    expiryTimer = null;
+    if (state.awayAt || !state.savedAt) return; // Lootlabs time is paused.
+    var remaining = SAVE_TTL_MS - (Date.now() - state.savedAt);
+    if (remaining <= 0) {
+      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+      persistState();
+      render();
+      return;
+    }
+    expiryTimer = setTimeout(function () {
+      if (!state.awayAt && Date.now() - state.savedAt >= SAVE_TTL_MS) {
+        state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+        persistState();
+        render();
+      } else {
+        scheduleExpiry();
+      }
+    }, remaining);
+  }
   function saveState() {
     state.savedAt = Date.now();
     persistState();
+    scheduleExpiry();
   }
   function resumeTimerAfterAway() {
     if (!state.awayAt) return;
@@ -359,6 +382,7 @@
     if (awayDuration >= 0) state.savedAt += awayDuration;
     state.awayAt = 0;
     persistState();
+    scheduleExpiry();
   }
 
   function isConfigured(url) {
