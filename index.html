@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer-when-downgrade">
 <meta name="theme-color" content="#0b0e14">
-<title>Free Fire Panel | Secure Download</title>
+<title>SR PANEL ZONE</title>
 
 <style>
   @property --angle{syntax:"<angle>";initial-value:0deg;inherits:false}
@@ -243,17 +243,9 @@
     </div>
   </section>
 
-  <section class="card">
-    <div class="steps">
-      <div class="steps-line"><div class="steps-fill" id="stepsFill"></div></div>
-      <ol id="stepList"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol>
-    </div>
-  </section>
-
   <section class="card action">
-    <div class="step-label" id="stepLabel">Step <b>1</b> / 5</div>
-    <a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a>
-    <a class="btn final" id="secondDownloadBtn" href="#" rel="noopener noreferrer" hidden>Kurama Mods V2.0 Latest</a>
+    <div class="step-label">READY TO START?</div>
+    <a class="btn" href="lootlabs.html">Lootlabs</a>
   </section>
 
   <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
@@ -264,257 +256,11 @@
 
 <script>
 (function () {
-  'use strict';
-
-  /* =====================================================================
-     [EDIT HERE] SETTINGS
-     ===================================================================== */
-
-  // [EDIT HERE] PASTE LOOTLABS LINKS HERE
-  const lootlabsLinks = {
-    1: 'https://loot-link.com/s?L9DIc2Pi&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0Eic7Pf1odPUijeSam6m5b6',
-    2: 'https://loot-link.com/s?L9DIc2Pi&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0Fa0H5lszLyTGOZVajr6QhJ',
-    3: 'https://loot-link.com/s?L9DIc2Pi&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0Gt%2BCS9lrdvLdc355MOqyE1',
-    4: 'https://loot-link.com/s?L9DIc2Pi&data=l7PWPQslxgrZO77DRHkU%2BogNPRofh9Q1NYbkK36fO0GxZNckuHXdoETXuWVzZRGI'
-  };
-
-  // [EDIT HERE] PASTE YOUR REAL DOWNLOAD LINK HERE (button on Step 5)
-  // ⚠️ এখানে আপনার আসল ডাউনলোড লিংকটি বসাতে ভুলবেন না (যেমন: Mega, Mediafire বা Google Drive এর লিংক)
-  const FINAL_DOWNLOAD_LINK = 'https://loadly.io/dnrix0Cb';
-  const SECOND_DOWNLOAD_LINK = 'https://loadly.io/UfQocyB2';
-
-  // [EDIT HERE] File name shown on the card
-  const FILE_NAME = 'SR PANEL ZONE';
-
-  // [EDIT HERE] Any random text. Used to sign saved progress so hand-edited
-  // localStorage is detected and reset. Change it to something of your own.
-  const SECRET_SALT = 'change-me-7f3a9c';
-
-  // Minimum seconds between clicking START and a valid return from Lootlabs.
-  // Stops someone from typing ?step=2 right after clicking. Set 0 to disable.
-  const MIN_AWAY_SECONDS = 10;
-
-  /* ===================== END OF SETTINGS ===================== */
-
-  var TOTAL_STEPS = 5;
-  var STORAGE_KEY = 'safelink_progress_v3';
-  var CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-
-  var $ = function (id) { return document.getElementById(id); };
-  var stepItems = $('stepList').children;
-  var btn = $('mainBtn');
-  var secondBtn = $('secondDownloadBtn');
-  $('fileName').textContent = FILE_NAME;
-
-  // ---------- Tiny signed storage (cyrb53 hash) ----------
-  function hash(str) {
-    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (var i = 0, ch; i < str.length; i++) {
-      ch = str.charCodeAt(i);
-      h1 = Math.imul(h1 ^ ch, 2654435761);
-      h2 = Math.imul(h2 ^ ch, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  // Lootlabs may return visitors to the root URL with ?step=N.
+  // Forward those return visits to the dedicated progress page.
+  if (new URLSearchParams(location.search).has('step')) {
+    location.replace('lootlabs.html' + location.search + location.hash);
   }
-  function sign(step, pendingAt, savedAt, awayAt) {
-    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + awayAt + '|' + SECRET_SALT);
-  }
-  function legacySign(step, pendingAt, savedAt) {
-    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + SECRET_SALT);
-  }
-
-  // Each visitor's 5-minute timer pauses while they are away on Lootlabs.
-  var SAVE_TTL_MS = 5 * 60 * 1000;
-  var expiryTimer = null;
-  var state = loadState();
-
-  function loadState() {
-    try {
-      var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS &&
-          typeof s.pendingAt === 'number' && typeof s.savedAt === 'number') {
-        var awayAt = typeof s.awayAt === 'number' ? s.awayAt : 0;
-        var validSignature = s.sig === sign(s.step, s.pendingAt, s.savedAt, awayAt) ||
-          (!awayAt && s.sig === legacySign(s.step, s.pendingAt, s.savedAt));
-        var age = Date.now() - s.savedAt;
-        var validAge = age >= 0 && (awayAt > 0 ? awayAt <= Date.now() : age < SAVE_TTL_MS);
-        if (validSignature && validAge) {
-          return { step: s.step, pendingAt: s.pendingAt, savedAt: s.savedAt, awayAt: awayAt };
-        }
-      }
-    } catch (e) {}
-    return { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
-  }
-  function persistState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        step: state.step, pendingAt: state.pendingAt, savedAt: state.savedAt,
-        awayAt: state.awayAt, sig: sign(state.step, state.pendingAt, state.savedAt, state.awayAt)
-      }));
-    } catch (e) {}
-  }
-  function scheduleExpiry() {
-    if (expiryTimer) clearTimeout(expiryTimer);
-    expiryTimer = null;
-    if (state.awayAt || !state.savedAt) return; // Lootlabs time is paused.
-    var remaining = SAVE_TTL_MS - (Date.now() - state.savedAt);
-    if (remaining <= 0) {
-      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
-      persistState();
-      render();
-      return;
-    }
-    expiryTimer = setTimeout(function () {
-      if (!state.awayAt && Date.now() - state.savedAt >= SAVE_TTL_MS) {
-        state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
-        persistState();
-        render();
-      } else {
-        scheduleExpiry();
-      }
-    }, remaining);
-  }
-  function saveState() {
-    state.savedAt = Date.now();
-    persistState();
-    scheduleExpiry();
-  }
-  function resumeTimerAfterAway() {
-    if (!state.awayAt) return;
-    var awayDuration = Date.now() - state.awayAt;
-    if (awayDuration >= 0) state.savedAt += awayDuration;
-    state.awayAt = 0;
-    persistState();
-    scheduleExpiry();
-  }
-
-  function isConfigured(url) {
-    return typeof url === 'string' && /^https?:\/\//i.test(url) && !/PASTE/i.test(url) && !/your-actual-file-link/i.test(url);
-  }
-
-  var toastTimer;
-  function toast(msg) {
-    var t = $('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
-  }
-
-  function setLoading(on) {
-    if (on) {
-      btn.classList.add('loading');
-      btn.innerHTML = '<span class="spinner"></span>Connecting';
-    } else {
-      btn.classList.remove('loading');
-    }
-  }
-
-  // ---------- Render ----------
-  function render() {
-    for (var i = 0; i < TOTAL_STEPS; i++) {
-      var n = i + 1;
-      stepItems[i].className = n < state.step ? 'done' : (n === state.step ? 'active' : '');
-      if (n < state.step) stepItems[i].innerHTML = CHECK_SVG; else stepItems[i].textContent = String(n);
-    }
-    $('stepsFill').style.width = ((state.step - 1) / (TOTAL_STEPS - 1) * 100) + '%';
-    $('stepLabel').innerHTML = 'Step <b>' + state.step + '</b> / ' + TOTAL_STEPS;
-
-    setLoading(false);
-    btn.style.pointerEvents = '';
-    secondBtn.style.pointerEvents = '';
-    if (state.step === TOTAL_STEPS) {
-      btn.textContent = 'XYX V2.4 Still working';
-      btn.classList.add('final');
-      btn.href = isConfigured(FINAL_DOWNLOAD_LINK) ? FINAL_DOWNLOAD_LINK : '#';
-      secondBtn.hidden = false;
-      secondBtn.href = isConfigured(SECOND_DOWNLOAD_LINK) ? SECOND_DOWNLOAD_LINK : '#';
-    } else {
-      btn.textContent = 'Start';
-      btn.classList.remove('final');
-      var link = lootlabsLinks[state.step];
-      btn.href = isConfigured(link) ? link : '#';
-      secondBtn.hidden = true;
-      secondBtn.href = '#';
-    }
-
-    // keep the URL in sync so a refresh stays on the same step
-    try { history.replaceState(null, '', '?step=' + state.step); } catch (e) {}
-  }
-
-  // ---------- Click: Lootlabs steps and one-choice final download ----------
-  function handleMainButtonClick(e) {
-    var isFinal = state.step === TOTAL_STEPS;
-    var url = isFinal ? FINAL_DOWNLOAD_LINK : lootlabsLinks[state.step];
-    if (!isConfigured(url)) {
-      e.preventDefault();
-      toast('লিংক সেট করা হয়নি! কোডের ভেতরে লিংকগুলো চেক করুন।');
-      return;
-    }
-    if (isFinal) {
-      // One completed run allows exactly one panel choice.
-      btn.style.pointerEvents = 'none';
-      secondBtn.style.pointerEvents = 'none';
-      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
-      saveState();
-    } else {
-      state.pendingAt = Date.now(); // saved BEFORE leaving the page
-      state.awayAt = Date.now(); // pause the 5-minute timer while on Lootlabs
-      saveState();
-      setLoading(true);
-    }
-  }
-  btn.addEventListener('click', handleMainButtonClick);
-
-  secondBtn.addEventListener('click', function (e) {
-    if (state.step !== TOTAL_STEPS) {
-      e.preventDefault();
-      toast('দুটি Download option পেতে আগে ৫টি Step complete করুন।');
-      return;
-    }
-    if (!isConfigured(SECOND_DOWNLOAD_LINK)) {
-      e.preventDefault();
-      toast('দ্বিতীয় Download link সেট করা হয়নি।');
-      return;
-    }
-    // Lock both choices and reset progress before opening the selected panel.
-    btn.style.pointerEvents = 'none';
-    secondBtn.style.pointerEvents = 'none';
-    state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
-    saveState();
-  });
-
-  // ---------- Return from Lootlabs: ?step=N ----------
-  // The next step unlocks only if the user really clicked START on the current step
-  // and the URL asks for exactly the next step. Typing ?step=5 does nothing.
-  function handleReturn() {
-    var q = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    if (!q || q !== state.step + 1 || !state.pendingAt) return;
-    if (Date.now() - state.pendingAt >= MIN_AWAY_SECONDS * 1000) {
-      state.step += 1;
-      state.pendingAt = 0;
-      saveState();
-    } else {
-      toast('অনুগ্রহ করে Lootlabs-এর টাস্ক কমপ্লিট করুন।');
-    }
-  }
-
-  function init() {
-    state = loadState();
-    resumeTimerAfterAway();
-    handleReturn();
-    render();
-    // Start the five-minute expiry timer for progress restored from storage too.
-    scheduleExpiry();
-  }
-
-  // back button (bfcache) and other tabs
-  window.addEventListener('pageshow', function (e) { if (e.persisted) init(); });
-  window.addEventListener('storage', function (e) { if (e.key === STORAGE_KEY) init(); });
-
-  init();
 })();
 </script>
 </body>
