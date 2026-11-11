@@ -244,7 +244,7 @@
 
   <section class="card action">
     <div class="step-label">READY TO START?</div>
-    <a class="btn" href="lootlabs.html">Lootlabs</a>
+    <a class="btn" href="/lootlabs">Lootlabs</a>
   </section>
 
   <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
@@ -258,7 +258,7 @@
   // Lootlabs may return visitors to the root URL with ?step=N.
   // Forward those return visits to the dedicated progress page.
   if (new URLSearchParams(location.search).has('step')) {
-    location.replace('lootlabs.html' + location.search + location.hash);
+    location.replace('/lootlabs' + location.search + location.hash);
   }
 })();
 </script>
