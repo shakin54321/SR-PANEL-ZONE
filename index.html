@@ -107,7 +107,7 @@
   /* ---------- File card ---------- */
   .file{display:flex;align-items:center;gap:16px}
   .shield{
-    position:relative;flex:none;width:72px;height:72px;display:grid;place-items:center;overflow:hidden;border-radius:18px;
+    position:relative;flex:none;width:72px;height:72px;display:grid;place-items:center;overflow:hidden;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(0,229,255,.28);box-shadow:0 0 14px rgba(0,229,255,.12);
   }
   .shield::before,.shield::after{
     content:"";position:absolute;inset:0;border-radius:18px;
@@ -123,7 +123,7 @@
     box-shadow:0 0 26px rgba(0,229,255,.3), inset 0 0 18px rgba(0,229,255,.12);
   }
   .shield-core svg{width:32px;height:32px;stroke:var(--cyan);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(0,229,255,.8))}
-  .shield-image{width:140% !important;height:140% !important;max-width:none;display:block;object-fit:fill;object-position:center;border-radius:18px}
+  .shield-image{width:100% !important;height:100% !important;max-width:none;display:block;object-fit:contain;object-position:center;border-radius:17px;}
   .file-text{min-width:0;flex:1}
   .file-name{font-weight:800;font-size:1.12rem;letter-spacing:.02em;word-break:break-word}
   .file-tag{
