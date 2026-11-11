@@ -121,7 +121,7 @@
   /* ---------- File card ---------- */
   .file{display:flex;align-items:center;gap:16px}
   .shield{
-    position:relative;flex:none;width:62px;height:62px;display:grid;place-items:center;
+    position:relative;flex:none;width:72px;height:72px;display:grid;place-items:center;overflow:hidden;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(0,229,255,.28);box-shadow:0 0 14px rgba(0,229,255,.12);
   }
   .shield::before,.shield::after{
     content:"";position:absolute;inset:0;border-radius:18px;
@@ -130,6 +130,7 @@
   }
   .shield::after{animation-delay:1.3s}
   @keyframes ping{from{transform:scale(1);opacity:.7}to{transform:scale(1.55);opacity:0}}
+  .shield-image{width:100% !important;height:100% !important;max-width:none;display:block;object-fit:contain;object-position:center;border-radius:17px;}
   .shield-core{
     position:relative;width:62px;height:62px;border-radius:18px;display:grid;place-items:center;
     background:linear-gradient(145deg,rgba(0,229,255,.2),rgba(41,121,255,.08));
@@ -245,13 +246,11 @@
   <div class="ad-slot" id="adTop">Ad</div>
 
   <section class="card file">
-    <div class="shield" aria-hidden="true">
-      <div class="shield-core">
-        <svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.6v6c0 4.7 3.2 8.4 8 9.9 4.8-1.5 8-5.2 8-9.9v-6l-8-3.1Z"/><path d="m8.6 12.1 2.4 2.4 4.4-4.6"/></svg>
-      </div>
+    <div class="shield">
+      <img class="shield-image" src="https://i.postimg.cc/VsgR6KDQ/IMG-bcf4584b-ae56-460e-8be7-a1760cc0a561.jpg" alt="Lootlabs logo">
     </div>
     <div class="file-text">
-      <div class="file-name" id="fileName">SR PANEL ZONE</div>
+      <div class="file-name" id="fileName">Lootlabs</div>
       <span class="file-tag">
         <svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
         Verified
