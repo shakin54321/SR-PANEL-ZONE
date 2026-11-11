@@ -123,6 +123,7 @@
     box-shadow:0 0 26px rgba(0,229,255,.3), inset 0 0 18px rgba(0,229,255,.12);
   }
   .shield-core svg{width:32px;height:32px;stroke:var(--cyan);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(0,229,255,.8))}
+  .shield-image{width:62px;height:62px;display:block;object-fit:cover;border-radius:18px}
   .file-text{min-width:0;flex:1}
   .file-name{font-weight:800;font-size:1.12rem;letter-spacing:.02em;word-break:break-word}
   .file-tag{
@@ -229,10 +230,8 @@
   <div class="ad-slot" id="adTop">Ad</div>
 
   <section class="card file">
-    <div class="shield" aria-hidden="true">
-      <div class="shield-core">
-        <svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.6v6c0 4.7 3.2 8.4 8 9.9 4.8-1.5 8-5.2 8-9.9v-6l-8-3.1Z"/><path d="m8.6 12.1 2.4 2.4 4.4-4.6"/></svg>
-      </div>
+    <div class="shield">
+      <img class="shield-image" src="assets/sr-logo.jpg" alt="SR PANEL ZONE logo">
     </div>
     <div class="file-text">
       <div class="file-name" id="fileName">SR PANEL ZONE</div>
