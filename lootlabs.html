@@ -104,33 +104,19 @@
   }
   @keyframes spin{to{--angle:360deg}}
 
-  /* ---------- Back to Home ---------- */
+  /* ---------- Compact Back to Home ---------- */
   .home-link{
-    position:relative;isolation:isolate;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;gap:12px;
-    width:100%;min-height:58px;padding:14px 22px;border-radius:16px;
-    color:var(--text);text-decoration:none;font-size:1rem;font-weight:800;
-    letter-spacing:.08em;
-    background:linear-gradient(110deg,rgba(0,229,255,.16),rgba(41,121,255,.2));
-    border:1px solid rgba(0,229,255,.38);
-    box-shadow:0 8px 24px rgba(0,0,0,.22),0 0 22px rgba(0,229,255,.12),inset 0 1px 0 rgba(255,255,255,.1);
-    transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+    display:inline-flex;align-self:flex-start;align-items:center;gap:7px;
+    min-height:34px;padding:7px 12px;border-radius:10px;
+    color:var(--cyan);text-decoration:none;font-size:.78rem;font-weight:700;
+    letter-spacing:.02em;background:rgba(0,229,255,.07);
+    border:1px solid rgba(0,229,255,.2);
+    transition:background .2s ease,border-color .2s ease,transform .2s ease;
   }
-  .home-link::before{
-    content:"";position:absolute;inset:0;z-index:-1;opacity:0;
-    background:linear-gradient(110deg,rgba(0,229,255,.22),rgba(41,121,255,.3));
-    transition:opacity .2s ease;
-  }
-  .home-arrow{
-    width:30px;height:30px;display:grid;place-items:center;flex:none;
-    border-radius:10px;color:#02121a;font-size:1.25rem;font-weight:900;
-    background:linear-gradient(135deg,var(--cyan),var(--blue));
-    box-shadow:0 0 16px rgba(0,229,255,.3);
-  }
-  .home-link:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 12px 28px rgba(0,0,0,.28),0 0 28px rgba(0,229,255,.2)}
-  .home-link:hover::before{opacity:1}
-  .home-link:active{transform:translateY(1px) scale(.99)}
-  .home-link:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  .home-arrow{font-size:1rem;line-height:1}
+  .home-link:hover{background:rgba(0,229,255,.13);border-color:rgba(0,229,255,.4)}
+  .home-link:active{transform:translateY(1px)}
+  .home-link:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 
   /* ---------- File card ---------- */
   .file{display:flex;align-items:center;gap:16px}
