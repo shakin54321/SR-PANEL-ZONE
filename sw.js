@@ -1,6 +1,1 @@
-self.options = {
-    "domain": "3nbf4.com",
-    "zoneId": 12236141
-}
-self.lary = ""
-importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
+// Monetag push-ad service worker disabled on request.
