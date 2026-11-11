@@ -194,6 +194,25 @@
   .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(2,18,26,.25);border-top-color:#02121a;animation:rot .8s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
 
+  /* ---------- Floating Telegram support ---------- */
+  .support-btn{
+    position:fixed;right:max(18px,env(safe-area-inset-right));
+    bottom:max(18px,env(safe-area-inset-bottom));z-index:60;
+    display:inline-flex;align-items:center;gap:10px;
+    min-height:54px;padding:0 18px 0 14px;border-radius:999px;
+    color:#f4fbff;text-decoration:none;font-size:.82rem;font-weight:800;
+    letter-spacing:.08em;text-transform:uppercase;
+    background:linear-gradient(135deg,rgba(0,170,255,.96),rgba(41,121,255,.96));
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 10px 30px rgba(0,136,255,.34),0 0 24px rgba(0,190,255,.2);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;
+  }
+  .support-btn svg{width:25px;height:25px;flex:none;display:block;filter:drop-shadow(0 2px 5px rgba(0,40,100,.25))}
+  .support-btn:hover{transform:translateY(-3px);filter:brightness(1.1);box-shadow:0 14px 34px rgba(0,136,255,.42),0 0 28px rgba(0,190,255,.28)}
+  .support-btn:active{transform:scale(.96)}
+  .support-btn:focus-visible{outline:3px solid #fff;outline-offset:4px}
+
   /* ---------- Toast ---------- */
   .toast{
     position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
@@ -254,6 +273,14 @@
   <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
   <div class="ad-slot" id="adBottom">Ad</div>
 </div>
+
+<a class="support-btn" href="https://t.me/shakinkhan" target="_blank" rel="noopener noreferrer" aria-label="Contact support on Telegram">
+  <svg viewBox="0 0 32 32" role="img" aria-hidden="true">
+    <path d="M27.4 5.1 23.2 26c-.3 1.5-1.2 1.9-2.4 1.2l-6.7-4.9-3.2 3.1c-.4.4-.7.7-1.4.7l.5-6.8L22.4 9.1c.5-.5-.1-.8-.7-.4L7.1 18.1.6 16c-1.4-.4-1.4-1.4.3-2L25.8 4.3c1.2-.4 2.2.3 1.6.8Z" fill="currentColor"/>
+    <path d="m10 25.7.5-6.4L22.4 9.1" fill="none" stroke="rgba(0,55,115,.48)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span>Support</span>
+</a>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
