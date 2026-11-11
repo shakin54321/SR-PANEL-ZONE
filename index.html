@@ -253,14 +253,5 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script>
-(function () {
-  // Lootlabs may return visitors to the root URL with ?step=N.
-  // Forward those return visits to the dedicated progress page.
-  if (new URLSearchParams(location.search).has('step')) {
-    location.replace('/lootlabs' + location.search + location.hash);
-  }
-})();
-</script>
 </body>
 </html>
