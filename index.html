@@ -194,26 +194,29 @@
   .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(2,18,26,.25);border-top-color:#02121a;animation:rot .8s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
 
-  /* ---------- Floating Telegram support ---------- */
-  .support-btn{
-    position:fixed;right:max(18px,env(safe-area-inset-right));
-    bottom:max(18px,env(safe-area-inset-bottom));z-index:60;
-    display:inline-flex;align-items:center;gap:10px;
-    min-height:54px;padding:0 18px 0 14px;border-radius:999px;
-    color:#f4fbff;text-decoration:none;font-size:.82rem;font-weight:800;
-    letter-spacing:.08em;text-transform:uppercase;
-    background:linear-gradient(135deg,rgba(0,170,255,.96),rgba(41,121,255,.96));
-    border:1px solid rgba(255,255,255,.28);
-    box-shadow:0 10px 30px rgba(0,136,255,.34),0 0 24px rgba(0,190,255,.2);
-    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-    transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;
-  }
-  .support-btn svg{width:25px;height:25px;flex:none;display:block;filter:drop-shadow(0 2px 5px rgba(0,40,100,.25))}
-  .support-btn:hover{transform:translateY(-3px);filter:brightness(1.1);box-shadow:0 14px 34px rgba(0,136,255,.42),0 0 28px rgba(0,190,255,.28)}
-  .support-btn:active{transform:scale(.96)}
-  .support-btn:focus-visible{outline:3px solid #fff;outline-offset:4px}
-
-  /* ---------- Toast ---------- */
+  /* ---------- Floating support launcher + contact popup ---------- */
+  .support-btn{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:1001;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 15px 0 12px;border-radius:999px;color:#f4fbff;text-decoration:none;font-size:.76rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;background:linear-gradient(135deg,rgba(0,170,255,.97),rgba(41,121,255,.97));border:1px solid rgba(255,255,255,.3);box-shadow:0 8px 24px rgba(0,136,255,.32),0 0 18px rgba(0,190,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;cursor:pointer}
+  .support-btn svg{width:21px;height:21px;flex:none;display:block}
+  .support-btn:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 12px 28px rgba(0,136,255,.4)}
+  .support-btn:active{transform:scale(.97)}
+  .support-btn:focus-visible,.support-option:focus-visible,.support-close:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .support-popup[hidden]{display:none}
+  .support-popup{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:flex-end;padding:18px max(18px,env(safe-area-inset-right)) calc(76px + env(safe-area-inset-bottom)) 18px;background:rgba(2,8,18,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .support-panel{width:min(100%,330px);padding:18px;border-radius:22px;background:rgba(12,20,34,.97);border:1px solid rgba(120,190,255,.28);box-shadow:0 22px 65px rgba(0,0,0,.55),0 0 28px rgba(0,150,255,.14);animation:supportPop .22s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes supportPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .support-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .support-title{font-size:1rem;font-weight:850;letter-spacing:.04em;color:#f2f8ff}
+  .support-subtitle{font-size:.76rem;color:#9aacc5;margin-top:3px}
+  .support-close{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(160,190,230,.2);border-radius:50%;background:rgba(255,255,255,.06);color:#eaf4ff;font-size:20px;cursor:pointer}
+  .support-options{display:grid;gap:10px}
+  .support-option{min-height:54px;display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:14px;border:1px solid rgba(150,180,220,.16);background:rgba(255,255,255,.045);color:#f4f8ff;text-decoration:none;font-size:.9rem;font-weight:750;transition:background .18s ease,transform .18s ease,border-color .18s ease}
+  .support-option:hover{background:rgba(255,255,255,.09);border-color:rgba(130,190,255,.4);transform:translateY(-1px)}
+  .support-option svg{width:28px;height:28px;flex:none;display:block}
+  .support-option .support-note{margin-left:auto;font-size:.65rem;font-weight:650;letter-spacing:.04em;color:#8fa2bd}
+  .support-option.disabled{opacity:.58;cursor:default}
+  .support-option.disabled:hover{transform:none;background:rgba(255,255,255,.045);border-color:rgba(150,180,220,.16)}
+  @media(max-width:420px){.support-popup{padding-left:14px;padding-right:14px}.support-panel{width:100%}}
+/* ---------- Toast ---------- */
   .toast{
     position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
     transform:translate(-50%,30px);opacity:0;pointer-events:none;
@@ -274,14 +277,49 @@
   <div class="ad-slot" id="adBottom">Ad</div>
 </div>
 
-<a class="support-btn" href="tg://resolve?domain=shakinkhan" aria-label="Open direct support chat with @shakinkhan on Telegram">
-  <svg viewBox="0 0 32 32" role="img" aria-hidden="true">
-    <path d="M16 4.5a11 11 0 0 0-9.4 16.7L5.2 27l5.9-1.5A11 11 0 1 0 16 4.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M10.5 16v-1.2a5.5 5.5 0 0 1 11 0V16M10.5 15.5h-.8a1.7 1.7 0 0 0-1.7 1.7v2a1.7 1.7 0 0 0 1.7 1.7h1.6v-5.4Zm11 0h.8a1.7 1.7 0 0 1 1.7 1.7v2a1.7 1.7 0 0 1-1.7 1.7h-1.6v-5.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M21.5 21c-.5 1.5-1.8 2.3-3.7 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-  </svg>
+<button class="support-btn" type="button" data-support-action="toggle" aria-controls="supportPopup" aria-expanded="false" aria-label="Open support options">
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4.5a11 11 0 0 0-9.4 16.7L5.2 27l5.9-1.5A11 11 0 1 0 16 4.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 16v-1.2a5.5 5.5 0 0 1 11 0V16M10.5 15.5h-.8a1.7 1.7 0 0 0-1.7 1.7v2a1.7 1.7 0 0 0 1.7 1.7h1.6v-5.4Zm11 0h.8a1.7 1.7 0 0 1 1.7 1.7v2a1.7 1.7 0 0 1-1.7 1.7h-1.6v-5.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21.5 21c-.5 1.5-1.8 2.3-3.7 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   <span>Support</span>
-</a>
+</button>
+<div class="support-popup" id="supportPopup" data-support-action="backdrop" role="presentation" hidden>
+  <section class="support-panel" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+    <div class="support-head"><div><div class="support-title" id="supportTitle">Contact Support</div><div class="support-subtitle">Choose your preferred app</div></div><button class="support-close" type="button" data-support-action="close" aria-label="Close support options">×</button></div>
+    <div class="support-options">
+      <button class="support-option disabled" type="button" disabled aria-disabled="true">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#25D366"/><path d="M9.1 23.2 10.2 19a9 9 0 1 1 3.1 3.1l-4.2 1.1Z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.3 11.8c.3-.6.7-.6 1-.6h.5c.2 0 .4.1.5.4l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.2.4 0 .7.5.9 1.2 1.6 2.1 2.1.3.2.5.2.7 0l.8-1c.2-.2.4-.3.7-.2l1.8.9c.3.1.4.3.4.5 0 .4-.2 1.2-.7 1.6-.5.5-1.2.8-2 .7-1.1-.1-2.5-.7-4-2-1.3-1.1-2.2-2.5-2.5-3.6-.3-1 .1-2.1.6-2.8Z" fill="#fff"/></svg>
+        <span>WhatsApp</span><span class="support-note">Coming soon</span>
+      </button>
+      <a class="support-option" href="https://profile.imo.im/profileshare/shr.AAAAAAAAAAAAAAAAAAAAAH2SFEzfLQuFTzRviq1Q3bT2kJmDCRw6T6VCkpQIhDXb" data-support-action="navigate" aria-label="Open IMO support profile">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.8c-7.4 0-13.2 5.4-13.2 12.2 0 3.1 1.2 5.9 3.3 8L5 29l6.1-2.9c1.5.7 3.2 1.1 4.9 1.1 7.4 0 13.2-5.4 13.2-12.2S23.4 2.8 16 2.8Z" fill="#168CFF"/><text x="16" y="19.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="700" fill="#fff">imo</text></svg>
+        <span>IMO</span><span class="support-note">Open chat</span>
+      </a>
+      <a class="support-option" href="https://t.me/shakinkhan" data-support-action="navigate" aria-label="Open Telegram chat with @shakinkhan">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#229ED9"/><path d="m7.2 15.4 16.5-6.3c.8-.3 1.4.2 1.1 1.2l-2.8 13.1c-.2.9-.8 1.1-1.5.6l-4.2-3.1-2 1.9c-.3.3-.5.5-.9.5l.3-4.3 8-7.2c.4-.3-.1-.5-.5-.2l-9.9 6.2-4.3-1.3c-.9-.3-.9-.9.2-1.3Z" fill="#fff"/></svg>
+        <span>Telegram</span><span class="support-note">@shakinkhan</span>
+      </a>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var popup=document.getElementById('supportPopup');
+  var launcher=document.querySelector('.support-btn');
+  if(!popup||!launcher)return;
+  function setOpen(open){popup.hidden=!open;launcher.setAttribute('aria-expanded',String(open));}
+  document.addEventListener('click',function(event){
+    var target=event.target.closest('[data-support-action]');
+    if(!target)return;
+    var action=target.getAttribute('data-support-action');
+    if(action==='backdrop'&&event.target!==popup)return;
+    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+    if(action==='toggle'){setOpen(popup.hidden);return;}
+    if(action==='close'||action==='backdrop'){setOpen(false);return;}
+    if(action==='navigate'){var destination=target.getAttribute('href');if(destination)window.location.assign(destination);}
+  },true);
+  document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!popup.hidden){setOpen(false);launcher.focus();}});
+})();
+</script>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
