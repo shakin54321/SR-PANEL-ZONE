@@ -253,5 +253,25 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script>
+(function () {
+  // Lootlabs may return visitors to the home page. Resume their pending step.
+  try {
+    var key = 'safelink_progress_v3';
+    var state = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!state || !Number.isInteger(state.step) || state.step < 1 || state.step > 4 ||
+        typeof state.pendingAt !== 'number' || typeof state.awayAt !== 'number' ||
+        !state.pendingAt || !state.awayAt) return;
+
+    var elapsed = Date.now() - state.pendingAt;
+    if (elapsed < 10000 || state.awayAt > Date.now() || elapsed < 0) return;
+
+    var requestedStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (requestedStep !== state.step + 1) requestedStep = state.step + 1;
+
+    location.replace('/lootlabs?step=' + requestedStep);
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
