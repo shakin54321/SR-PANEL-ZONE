@@ -360,6 +360,9 @@
   }
   @media(prefers-reduced-motion:reduce){.support-option:not(.disabled),.support-option:not(.disabled)::after{transition:none}}
 
+
+/* Performance: pause decorative CSS animations while this tab is hidden. */
+html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animation-play-state:paused!important}
 </style>
 </head>
 
@@ -572,6 +575,11 @@
     location.replace('/lootlabs?step=' + requestedStep);
   } catch (e) {}
 })();
+</script>
+
+<script>
+/* Performance: suspend CSS animation work while the page is in the background. */
+(function(){var root=document.documentElement;function syncVisibility(){root.classList.toggle("page-hidden",document.hidden);}document.addEventListener("visibilitychange",syncVisibility,{passive:true});syncVisibility();})();
 </script>
 </body>
 </html>
