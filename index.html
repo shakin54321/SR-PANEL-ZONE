@@ -429,6 +429,14 @@
   var launcher=document.querySelector('.support-btn');
   var launcherWrap=document.getElementById('supportLauncherWrap');
   if(!popup||!launcher||!launcherWrap)return;
+  var supportClickSound=new Audio('https://audio.jukehost.co.uk/01a1cede-0207-71a3-a491-ec08a0e9bb69');
+  supportClickSound.preload='auto';
+  function playSupportClickSound(){
+    supportClickSound.pause();
+    supportClickSound.currentTime=0;
+    var playback=supportClickSound.play();
+    if(playback&&typeof playback.catch==='function')playback.catch(function(){});
+  }
   function setOpen(open){
     popup.hidden=!open;
     launcher.setAttribute('aria-expanded',String(open));
@@ -511,7 +519,7 @@
     var action=target.getAttribute('data-support-action');
     if(action==='backdrop'&&event.target!==popup)return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-    if(action==='toggle'){setOpen(popup.hidden);return;}
+    if(action==='toggle'){playSupportClickSound();setOpen(popup.hidden);return;}
     if(action==='close'||action==='backdrop'){setOpen(false);return;}
     if(action==='navigate'){var destination=target.getAttribute('href');if(destination)window.location.assign(destination);}
   },true);
