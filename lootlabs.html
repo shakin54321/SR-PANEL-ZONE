@@ -367,16 +367,31 @@
   }
   function scheduleSpeech(){clearTimeout(speechTimer);speechTimer=window.setTimeout(function(){if(popup.hidden&&!dragState)nextMessage();scheduleSpeech();},6500+Math.random()*5500);}
   scheduleSpeech();
+  function findSafePosition(){
+    var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight;
+    var margin=76, minX=margin,minY=margin;
+    var maxX=window.innerWidth-w-margin,maxY=window.innerHeight-h-margin;
+    if(maxX<minX||maxY<minY)return null;
+    var obstacles=Array.from(document.querySelectorAll('a,button,input,select,textarea,[role="button"],[role="link"]'))
+      .filter(function(el){return !launcherWrap.contains(el)&&!popup.contains(el)&&el.getClientRects().length;})
+      .map(function(el){var r=el.getBoundingClientRect();return {left:r.left-18,right:r.right+18,top:r.top-18,bottom:r.bottom+18};});
+    for(var attempt=0;attempt<55;attempt++){
+      var x=minX+Math.random()*(maxX-minX),y=minY+Math.random()*(maxY-minY);
+      var clear=obstacles.every(function(r){return x+w<=r.left||x>=r.right||y+h<=r.top||y>=r.bottom;});
+      if(clear)return {x:x,y:y};
+    }
+    return null;
+  }
   function wander(){
     clearTimeout(moveTimer);
     if(!popup.hidden||dragState){moveTimer=window.setTimeout(wander,1200);return;}
-    var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight,pad=14;
-    var maxX=Math.max(pad,window.innerWidth-w-pad),maxY=Math.max(pad,window.innerHeight-h-pad);
-    launcherWrap.style.left=(pad+Math.random()*Math.max(0,maxX-pad))+'px';
-    launcherWrap.style.top=(pad+Math.random()*Math.max(0,maxY-pad))+'px';
-    launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
-    if(Math.random()<.7){launcherWrap.classList.remove('playful');void launcherWrap.offsetWidth;launcherWrap.classList.add('playful');}
-    moveTimer=window.setTimeout(wander,4200+Math.random()*6500);
+    var spot=findSafePosition();
+    if(spot){
+      launcherWrap.style.left=spot.x+'px';launcherWrap.style.top=spot.y+'px';
+      launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
+      if(Math.random()<.7){launcherWrap.classList.remove('playful');void launcherWrap.offsetWidth;launcherWrap.classList.add('playful');}
+    }
+    moveTimer=window.setTimeout(wander,5200+Math.random()*7800);
   }
   moveTimer=window.setTimeout(wander,1800+Math.random()*1800);
   launcherWrap.addEventListener('pointerdown',function(event){
