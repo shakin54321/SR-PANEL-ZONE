@@ -245,7 +245,30 @@
   .support-option.disabled{opacity:.58;cursor:default}
   .support-option.disabled:hover{transform:none;background:rgba(255,255,255,.045);border-color:rgba(150,180,220,.16)}
   @media(max-width:420px){.support-popup{padding-left:14px;padding-right:14px}.support-panel{width:100%}}
-  .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.035);color:#f5fbff;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(3px) saturate(115%);-webkit-backdrop-filter:blur(3px) saturate(115%);font-size:12px;line-height:1.35;font-weight:750;text-align:center;text-shadow:0 1px 5px rgba(0,0,0,.35);box-shadow:0 8px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.22);pointer-events:none;animation:supportSpeechIn .35s ease both,supportBubbleFloat 3.8s ease-in-out infinite;z-index:3}
+  /* Premium support popup + gentle companion hide/show */
+   .support-popup{align-items:center;justify-content:center;padding:20px;background:rgba(5,12,25,.58);-webkit-backdrop-filter:blur(12px) saturate(125%);backdrop-filter:blur(12px);animation:supportBackdropIn .28s ease both}
+   @keyframes supportBackdropIn{from{opacity:0}to{opacity:1}}
+   .support-panel{position:relative;overflow:hidden;width:min(100%,370px);padding:24px 22px 20px;border-radius:26px;background:linear-gradient(155deg,rgba(22,36,58,.98),rgba(9,17,31,.98));border:1px solid rgba(164,207,255,.22);box-shadow:0 28px 90px rgba(0,0,0,.52),0 0 42px rgba(50,145,255,.13);animation:supportPanelEnter .42s cubic-bezier(.2,.85,.25,1) both}
+   .support-panel::before{content:"";position:absolute;inset:0 12% auto;height:2px;background:linear-gradient(90deg,transparent,#75d8ff,#b5a0ff,#ffb6da,transparent);opacity:.9}
+   .support-panel::after{content:"";position:absolute;width:190px;height:190px;right:-105px;top:-115px;border-radius:50%;background:radial-gradient(circle,rgba(82,164,255,.2),transparent 70%);pointer-events:none}
+   @keyframes supportPanelEnter{0%{opacity:0;transform:translateY(18px) scale(.94)}65%{opacity:1;transform:translateY(-3px) scale(1.012)}100%{opacity:1;transform:translateY(0) scale(1)}}
+   .support-head{position:relative;z-index:1;align-items:flex-start;margin-bottom:20px;padding-right:4px}
+   .support-title{font-size:1.18rem;letter-spacing:-.025em;color:#f7fbff}
+   .support-title::before{content:"SUPPORT CENTER";display:block;margin-bottom:7px;color:#8fcfff;font-size:.62rem;font-weight:850;letter-spacing:.17em}
+   .support-subtitle{max-width:260px;margin-top:6px;color:#a9bad0;font-size:.78rem;line-height:1.5}
+   .support-close{flex:none;width:36px;height:36px;border-color:rgba(190,215,245,.18);background:rgba(255,255,255,.07);font-size:22px;transition:background .2s ease,transform .2s ease}
+   .support-close:hover{background:rgba(255,255,255,.15);transform:rotate(90deg)}
+   .support-options{position:relative;z-index:1;gap:11px}
+   .support-option{min-height:62px;padding:12px 15px;border-radius:17px;border-color:rgba(164,195,230,.14);background:linear-gradient(110deg,rgba(255,255,255,.075),rgba(255,255,255,.035));box-shadow:inset 0 1px 0 rgba(255,255,255,.055);font-size:.91rem;transition:background .22s ease,transform .22s cubic-bezier(.2,.8,.2,1),border-color .22s ease,box-shadow .22s ease}
+   .support-option:hover{background:linear-gradient(110deg,rgba(105,178,255,.17),rgba(255,255,255,.06));border-color:rgba(133,196,255,.42);transform:translateY(-2px);box-shadow:0 9px 24px rgba(0,0,0,.18)}
+   .support-option svg{width:31px;height:31px}
+   .support-option .support-note{color:#a9bdd5;font-size:.66rem}
+   .support-option.disabled{opacity:.52}
+   .support-launcher-wrap{transition:opacity .38s ease,visibility 0s linear 0s,left 2.7s cubic-bezier(.22,.75,.25,1),top 2.7s cubic-bezier(.22,.75,.25,1),right .2s,bottom .2s,transform .38s cubic-bezier(.2,.8,.2,1)}
+   .support-launcher-wrap.support-suspended{opacity:0!important;visibility:hidden;pointer-events:none;transform:scale(.82);transition:opacity .38s ease,visibility 0s linear .38s,transform .38s cubic-bezier(.2,.8,.2,1)}
+   @media(max-width:420px){.support-popup{align-items:center;padding:16px}.support-panel{width:100%;padding:22px 18px 18px;border-radius:23px}}
+   @media(prefers-reduced-motion:reduce){.support-popup,.support-panel,.support-launcher-wrap{animation:none!important;transition:none!important}}
+   .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.035);color:#f5fbff;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(3px) saturate(115%);-webkit-backdrop-filter:blur(3px) saturate(115%);font-size:12px;line-height:1.35;font-weight:750;text-align:center;text-shadow:0 1px 5px rgba(0,0,0,.35);box-shadow:0 8px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.22);pointer-events:none;animation:supportSpeechIn .35s ease both,supportBubbleFloat 3.8s ease-in-out infinite;z-index:3}
   .support-speech::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.035);filter:drop-shadow(0 2px 1px rgba(255,255,255,.18))}
   @keyframes supportBubbleFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
   @keyframes supportBubblePop{0%{scale:.7;opacity:0}65%{scale:1.06;opacity:1}100%{scale:1;opacity:1}}
@@ -334,7 +357,7 @@
 </div>
 <div class="support-popup" id="supportPopup" data-support-action="backdrop" role="presentation" hidden>
   <section class="support-panel" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
-    <div class="support-head"><div><div class="support-title" id="supportTitle">Contact Support</div><div class="support-subtitle">Choose your preferred app</div></div><button class="support-close" type="button" data-support-action="close" aria-label="Close support options">×</button></div>
+    <div class="support-head"><div><div class="support-title" id="supportTitle">Contact Support</div><div class="support-subtitle">Choose how you’d like to reach our support team</div></div><button class="support-close" type="button" data-support-action="close" aria-label="Close support options">×</button></div>
     <div class="support-options">
       <button class="support-option disabled" type="button" disabled aria-disabled="true">
         <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#25D366"/><path d="M9.1 23.2 10.2 19a9 9 0 1 1 3.1 3.1l-4.2 1.1Z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.3 11.8c.3-.6.7-.6 1-.6h.5c.2 0 .4.1.5.4l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.2.4 0 .7.5.9 1.2 1.6 2.1 2.1.3.2.5.2.7 0l.8-1c.2-.2.4-.3.7-.2l1.8.9c.3.1.4.3.4.5 0 .4-.2 1.2-.7 1.6-.5.5-1.2.8-2 .7-1.1-.1-2.5-.7-4-2-1.3-1.1-2.2-2.5-2.5-3.6-.3-1 .1-2.1.6-2.8Z" fill="#fff"/></svg>
@@ -358,7 +381,12 @@
   var launcher=document.querySelector('.support-btn');
   var launcherWrap=document.getElementById('supportLauncherWrap');
   if(!popup||!launcher||!launcherWrap)return;
-  function setOpen(open){popup.hidden=!open;launcher.setAttribute('aria-expanded',String(open));}
+  function setOpen(open){
+    popup.hidden=!open;
+    launcher.setAttribute('aria-expanded',String(open));
+    if(open){launcherWrap.classList.add('support-suspended');clearTimeout(moveTimer);clearTimeout(speechTimer);}
+    else{launcherWrap.classList.remove('support-suspended');scheduleSpeech();clearTimeout(moveTimer);moveTimer=window.setTimeout(wander,1400+Math.random()*900);}
+  }
   var dragState=null;
   var suppressLauncherClick=false;
   var speech=document.getElementById('supportSpeech');
