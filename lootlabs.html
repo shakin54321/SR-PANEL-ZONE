@@ -152,12 +152,12 @@
   .steps-line{position:absolute;left:19px;right:19px;top:18px;height:7px;border-radius:999px;background:linear-gradient(90deg,rgba(120,150,200,.13),rgba(120,150,200,.2));overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.025)}
   .steps-fill{
     position:relative;height:100%;width:0;border-radius:999px;
-    background:linear-gradient(90deg,#7c6cff 0%,#36c8ff 48%,#68f0d2 100%);
-    background-size:180% 100%;box-shadow:0 0 9px rgba(54,200,255,.65),0 0 18px rgba(124,108,255,.35);
+    background:linear-gradient(90deg,#a78bfa 0%,#8b5cf6 48%,#d8b4fe 100%);
+    background-size:180% 100%;box-shadow:0 0 9px rgba(167,139,250,.7),0 0 18px rgba(139,92,246,.4);
     transition:width 1s cubic-bezier(.22,1,.36,1);
     animation:progressHue 4s ease-in-out infinite alternate;
   }
-  .steps-fill::before{content:"";position:absolute;right:-3px;top:50%;width:11px;height:11px;border-radius:50%;background:#d9ffff;transform:translateY(-50%);box-shadow:0 0 7px #fff,0 0 15px #36c8ff,0 0 24px #7c6cff;opacity:.9}
+  .steps-fill::before{content:"";position:absolute;right:-3px;top:50%;width:11px;height:11px;border-radius:50%;background:#f4eaff;transform:translateY(-50%);box-shadow:0 0 7px #fff,0 0 15px #a78bfa,0 0 24px #8b5cf6;opacity:.9}
   .steps-fill::after{content:"";position:absolute;inset:-2px;background:linear-gradient(100deg,transparent 15%,rgba(255,255,255,.8) 48%,transparent 78%);transform:translateX(-110%);animation:shine 2.2s ease-in-out infinite}
   @keyframes shine{to{transform:translateX(110%)}}
   @keyframes progressHue{to{background-position:100% 0}}
@@ -171,11 +171,11 @@
     transition:color .35s ease,background .45s ease,border-color .35s ease,box-shadow .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);
   }
   .steps li svg{width:17px;height:17px;display:block;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-  .steps li.done{color:#071c26;background:linear-gradient(145deg,#9af8e4,#54d9ff);border-color:rgba(255,255,255,.75);box-shadow:0 0 0 3px rgba(84,217,255,.1),0 0 17px rgba(84,217,255,.55);animation:stepPop .55s cubic-bezier(.2,1.5,.5,1) both}
-  .steps li.active{color:#fff;background:linear-gradient(145deg,#9b8cff,#5d83ff 58%,#48cfff);border-color:rgba(255,255,255,.85);box-shadow:0 0 0 5px rgba(124,108,255,.13),0 0 19px rgba(105,137,255,.7),inset 0 1px 3px rgba(255,255,255,.4);animation:activeBreathe 2s ease-in-out infinite}
+  .steps li.done{color:#071c26;background:linear-gradient(145deg,#e9d5ff,#a78bfa);border-color:rgba(255,255,255,.75);box-shadow:0 0 0 3px rgba(167,139,250,.12),0 0 17px rgba(139,92,246,.58);animation:stepPop .55s cubic-bezier(.2,1.5,.5,1) both}
+  .steps li.active{color:#fff;background:linear-gradient(145deg,#d8b4fe,#9b7aff 58%,#7c3aed);border-color:rgba(255,255,255,.85);box-shadow:0 0 0 5px rgba(167,139,250,.15),0 0 19px rgba(139,92,246,.72),inset 0 1px 3px rgba(255,255,255,.4);animation:activeBreathe 2s ease-in-out infinite}
   .steps li.locked{color:rgba(175,190,220,.58);background:linear-gradient(145deg,rgba(35,44,65,.92),rgba(19,26,43,.98));border-color:rgba(151,169,205,.13);box-shadow:inset 0 1px 2px rgba(255,255,255,.035),0 3px 9px rgba(0,0,0,.16)}
   .steps li.locked svg{width:16px;height:16px;stroke:rgba(175,190,220,.58);stroke-width:1.9}
-  @keyframes activeBreathe{50%{transform:translateY(-2px) scale(1.07);box-shadow:0 0 0 7px rgba(124,108,255,.07),0 0 25px rgba(105,137,255,.75),inset 0 1px 3px rgba(255,255,255,.45)}}
+  @keyframes activeBreathe{50%{transform:translateY(-2px) scale(1.07);box-shadow:0 0 0 7px rgba(167,139,250,.08),0 0 25px rgba(139,92,246,.78),inset 0 1px 3px rgba(255,255,255,.45)}}
   @keyframes stepPop{0%{transform:scale(.72) rotate(-12deg)}65%{transform:scale(1.16) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
   @media(prefers-reduced-motion:reduce){.steps-fill,.steps-fill::after,.steps li{animation:none!important;transition:none!important}}
 
