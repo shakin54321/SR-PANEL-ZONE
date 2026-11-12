@@ -211,7 +211,35 @@
   .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(2,18,26,.25);border-top-color:#02121a;animation:rot .8s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
 
-  /* ---------- Toast ---------- */
+    /* ---------- Floating support launcher + contact popup ---------- */
+  .support-launcher-wrap{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));left:auto;top:auto;z-index:1001;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:left,top}
+  .support-launcher-wrap::before{content:"";position:absolute;top:-14px;left:-14px;width:88px;height:88px;border-radius:50%;background:radial-gradient(ellipse at 22% 34%,rgba(255,49,88,.78),transparent 43%),radial-gradient(ellipse at 72% 24%,rgba(255,157,36,.72),transparent 42%),radial-gradient(ellipse at 82% 62%,rgba(255,240,42,.62),transparent 43%),radial-gradient(ellipse at 58% 82%,rgba(57,232,121,.72),transparent 44%),radial-gradient(ellipse at 20% 76%,rgba(32,217,255,.72),transparent 43%),radial-gradient(ellipse at 48% 42%,rgba(88,101,255,.58),transparent 48%),radial-gradient(ellipse at 76% 48%,rgba(193,59,255,.62),transparent 44%);filter:blur(13px);opacity:.62;animation:supportRainbowGlow 4s linear infinite;pointer-events:none;z-index:0}
+  @keyframes supportRainbowGlow{to{transform:rotate(360deg)}}.support-btn{position:relative;right:auto;bottom:auto;z-index:1;display:flex;align-items:center;justify-content:center;width:60px;height:60px;padding:0;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(255,255,255,.20));border:0;backdrop-filter:blur(22px) saturate(145%);-webkit-backdrop-filter:blur(22px) saturate(145%);box-shadow:inset 0 1px 3px rgba(255,255,255,.62),inset 0 -1px 2px rgba(255,255,255,.18),0 8px 24px rgba(0,136,255,.18);transition:transform .24s cubic-bezier(.2,.8,.2,1),filter .2s ease,box-shadow .2s ease;cursor:pointer;touch-action:none}.support-launcher-wrap.dragging{cursor:grabbing}.support-launcher-label{font-size:10px;line-height:1.2;font-weight:700;letter-spacing:.02em;color:#eaf4ff;text-shadow:0 1px 4px rgba(0,0,0,.85);white-space:nowrap;pointer-events:none}
+  .support-btn img{position:relative;z-index:1;width:145%;height:145%;flex:none;display:block;object-fit:cover;object-position:center;border-radius:50%;transform:none;filter:drop-shadow(0 3px 7px rgba(0,0,0,.38));pointer-events:none}
+  .support-btn:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 12px 28px rgba(0,136,255,.4)}
+  @keyframes supportButtonTap{0%{transform:scale(1) rotate(0)}35%{transform:scale(.86) rotate(-7deg)}68%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+  .support-btn:active{animation:supportButtonTap .38s cubic-bezier(.2,.8,.2,1)}
+  .support-btn:focus-visible,.support-option:focus-visible,.support-close:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .support-popup[hidden]{display:none}
+  .support-popup{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:flex-end;padding:18px max(18px,env(safe-area-inset-right)) calc(76px + env(safe-area-inset-bottom)) 18px;background:rgba(2,8,18,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .support-panel{width:min(100%,330px);padding:18px;border-radius:22px;background:rgba(12,20,34,.97);border:1px solid rgba(120,190,255,.28);box-shadow:0 22px 65px rgba(0,0,0,.55),0 0 28px rgba(0,150,255,.14);animation:supportPop .22s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes supportPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .support-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .support-title{font-size:1rem;font-weight:850;letter-spacing:.04em;color:#f2f8ff}
+  .support-subtitle{font-size:.76rem;color:#9aacc5;margin-top:3px}
+  .support-close{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(160,190,230,.2);border-radius:50%;background:rgba(255,255,255,.06);color:#eaf4ff;font-size:20px;cursor:pointer}
+  .support-options{display:grid;gap:10px}
+  .support-option{min-height:54px;display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:14px;border:1px solid rgba(150,180,220,.16);background:rgba(255,255,255,.045);color:#f4f8ff;text-decoration:none;font-size:.9rem;font-weight:750;transition:background .18s ease,transform .18s ease,border-color .18s ease}
+  .support-option:hover{background:rgba(255,255,255,.09);border-color:rgba(130,190,255,.4);transform:translateY(-1px)}
+  .support-option svg{width:28px;height:28px;flex:none;display:block}
+  .support-option .support-note{margin-left:auto;font-size:.65rem;font-weight:650;letter-spacing:.04em;color:#8fa2bd}
+  .support-option.disabled{opacity:.58;cursor:default}
+  .support-option.disabled:hover{transform:none;background:rgba(255,255,255,.045);border-color:rgba(150,180,220,.16)}
+  @media(max-width:420px){.support-popup{padding-left:14px;padding-right:14px}.support-panel{width:100%}}
+  .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.94);color:#182235;font-size:12px;line-height:1.35;font-weight:750;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.9);pointer-events:none;animation:supportSpeechIn .35s ease both;z-index:3}
+  .support-speech::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.94)}
+  @keyframes supportSpeechIn{from{opacity:0;transform:translate(-50%,7px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+/* ---------- Toast ---------- */
   .toast{
     position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
     transform:translate(-50%,30px);opacity:0;pointer-events:none;
@@ -278,6 +306,105 @@
   <!-- [EDIT HERE] BOTTOM AD BANNER - paste your ad code inside this div -->
   <div class="ad-slot" id="adBottom">Ad</div>
 </div>
+
+<div class="support-launcher-wrap" id="supportLauncherWrap">
+<div class="support-speech" id="supportSpeech" role="status" aria-live="polite">Hi! Need help? I’m here.</div>
+<button class="support-btn" type="button" data-support-action="toggle" aria-controls="supportPopup" aria-expanded="false" aria-label="Open support options">
+  <img src="https://i.postimg.cc/mkgy4m22/IMG-e3827ada-bb17-4b3e-a056-7ca8ca4d1d94.png" alt="">
+</button>
+<span class="support-launcher-label">Need help?</span>
+</div>
+<div class="support-popup" id="supportPopup" data-support-action="backdrop" role="presentation" hidden>
+  <section class="support-panel" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+    <div class="support-head"><div><div class="support-title" id="supportTitle">Contact Support</div><div class="support-subtitle">Choose your preferred app</div></div><button class="support-close" type="button" data-support-action="close" aria-label="Close support options">×</button></div>
+    <div class="support-options">
+      <button class="support-option disabled" type="button" disabled aria-disabled="true">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#25D366"/><path d="M9.1 23.2 10.2 19a9 9 0 1 1 3.1 3.1l-4.2 1.1Z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.3 11.8c.3-.6.7-.6 1-.6h.5c.2 0 .4.1.5.4l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.2.4 0 .7.5.9 1.2 1.6 2.1 2.1.3.2.5.2.7 0l.8-1c.2-.2.4-.3.7-.2l1.8.9c.3.1.4.3.4.5 0 .4-.2 1.2-.7 1.6-.5.5-1.2.8-2 .7-1.1-.1-2.5-.7-4-2-1.3-1.1-2.2-2.5-2.5-3.6-.3-1 .1-2.1.6-2.8Z" fill="#fff"/></svg>
+        <span>WhatsApp</span><span class="support-note">Coming soon</span>
+      </button>
+      <a class="support-option" href="https://profile.imo.im/profileshare/shr.AAAAAAAAAAAAAAAAAAAAAH2SFEzfLQuFTzRviq1Q3bT2kJmDCRw6T6VCkpQIhDXb" data-support-action="navigate" aria-label="Open IMO support profile">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.8c-7.4 0-13.2 5.4-13.2 12.2 0 3.1 1.2 5.9 3.3 8L5 29l6.1-2.9c1.5.7 3.2 1.1 4.9 1.1 7.4 0 13.2-5.4 13.2-12.2S23.4 2.8 16 2.8Z" fill="#168CFF"/><text x="16" y="19.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="700" fill="#fff">imo</text></svg>
+        <span>IMO</span><span class="support-note">Open chat</span>
+      </a>
+      <a class="support-option" href="https://t.me/shakinkhan" data-support-action="navigate" aria-label="Open Telegram chat with @shakinkhan">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#229ED9"/><path d="m7.2 15.4 16.5-6.3c.8-.3 1.4.2 1.1 1.2l-2.8 13.1c-.2.9-.8 1.1-1.5.6l-4.2-3.1-2 1.9c-.3.3-.5.5-.9.5l.3-4.3 8-7.2c.4-.3-.1-.5-.5-.2l-9.9 6.2-4.3-1.3c-.9-.3-.9-.9.2-1.3Z" fill="#fff"/></svg>
+        <span>Telegram</span><span class="support-note">@shakinkhan</span>
+      </a>
+    </div>
+  </section>
+</div>
+
+(function(){
+  var popup=document.getElementById('supportPopup');
+  var launcher=document.querySelector('.support-btn');
+  var launcherWrap=document.getElementById('supportLauncherWrap');
+  if(!popup||!launcher||!launcherWrap)return;
+  function setOpen(open){popup.hidden=!open;launcher.setAttribute('aria-expanded',String(open));}
+  var dragState=null;
+  var suppressLauncherClick=false;
+  var speech=document.getElementById('supportSpeech');
+  var helperMessages=['Hi! Need help? I’m here.','কোনো সমস্যা হচ্ছে? আমি সাহায্য করতে পারি!','Download করতে সাহায্য লাগলে বলো।','Need help with a page? Just tap me!','কোনো link কাজ না করলে জানাও।'];
+  var messageIndex=0;
+  if(speech)window.setInterval(function(){messageIndex=(messageIndex+1)%helperMessages.length;speech.textContent=helperMessages[messageIndex];},5200);
+  var orbitStart=performance.now();
+  function orbitHelper(now){
+    if(!dragState&&popup.hidden&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight,pad=10;
+      var maxX=Math.max(pad,window.innerWidth-w-pad),maxY=Math.max(pad,window.innerHeight-h-pad);
+      var minX=pad,minY=pad,dx=maxX-minX,dy=maxY-minY,perimeter=2*(dx+dy);
+      if(perimeter>0){
+        var distance=((now-orbitStart)/60000*perimeter)%perimeter,x=maxX,y=maxY;
+        if(distance<=dx){x=maxX-distance;y=maxY;}
+        else if((distance-=dx)<=dy){x=minX;y=maxY-distance;}
+        else if((distance-=dy)<=dx){x=minX+distance;y=minY;}
+        else{distance-=dx;x=maxX;y=minY+distance;}
+        launcherWrap.style.left=x+'px';launcherWrap.style.top=y+'px';launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
+      }
+    }
+    window.requestAnimationFrame(orbitHelper);
+  }
+  window.requestAnimationFrame(orbitHelper);
+
+  launcherWrap.addEventListener('pointerdown',function(event){
+    if(!popup.hidden||event.button!==0)return;
+    var rect=launcherWrap.getBoundingClientRect();
+    dragState={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,left:rect.left,top:rect.top,moved:false};
+    launcherWrap.setPointerCapture(event.pointerId);
+  });
+  launcherWrap.addEventListener('pointermove',function(event){
+    if(!dragState||event.pointerId!==dragState.pointerId)return;
+    var dx=event.clientX-dragState.startX,dy=event.clientY-dragState.startY;
+    if(Math.abs(dx)+Math.abs(dy)>5)dragState.moved=true;
+    if(!dragState.moved)return;
+    var maxLeft=Math.max(0,window.innerWidth-launcherWrap.offsetWidth);
+    var maxTop=Math.max(0,window.innerHeight-launcherWrap.offsetHeight);
+    launcherWrap.style.left=Math.min(maxLeft,Math.max(0,dragState.left+dx))+'px';
+    launcherWrap.style.top=Math.min(maxTop,Math.max(0,dragState.top+dy))+'px';
+    launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
+    launcherWrap.classList.add('dragging');
+  });
+  function finishDrag(event){
+    if(!dragState||event.pointerId!==dragState.pointerId)return;
+    if(dragState.moved){suppressLauncherClick=true;window.setTimeout(function(){suppressLauncherClick=false;},0);}
+    dragState=null;launcherWrap.classList.remove('dragging');
+  }
+  launcherWrap.addEventListener('pointerup',finishDrag);
+  launcherWrap.addEventListener('pointercancel',finishDrag);
+  document.addEventListener('click',function(event){
+    if(suppressLauncherClick&&event.target.closest('#supportLauncherWrap')){suppressLauncherClick=false;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();return;}
+    var target=event.target.closest('[data-support-action]');
+    if(!target)return;
+    var action=target.getAttribute('data-support-action');
+    if(action==='backdrop'&&event.target!==popup)return;
+    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+    if(action==='toggle'){setOpen(popup.hidden);return;}
+    if(action==='close'||action==='backdrop'){setOpen(false);return;}
+    if(action==='navigate'){var destination=target.getAttribute('href');if(destination)window.location.assign(destination);}
+  },true);
+  document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!popup.hidden){setOpen(false);launcher.focus();}});
+})();
+</script>
+
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
