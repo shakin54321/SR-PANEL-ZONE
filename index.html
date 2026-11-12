@@ -248,6 +248,20 @@
   .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.94);color:#182235;font-size:12px;line-height:1.35;font-weight:750;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.9);pointer-events:none;animation:supportSpeechIn .35s ease both;z-index:3}
   .support-speech::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.94)}
   @keyframes supportSpeechIn{from{opacity:0;transform:translate(-50%,7px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+  .support-launcher-wrap{transition:left 2.7s cubic-bezier(.22,.75,.25,1),top 2.7s cubic-bezier(.22,.75,.25,1),right .2s,bottom .2s}
+  .support-btn{transform-origin:50% 60%;animation:supportCuteFloat 3.1s ease-in-out infinite}
+  .support-btn img{animation:supportCuteTilt 4.6s ease-in-out infinite}
+  .support-launcher-wrap.playful .support-btn{animation:supportCutePlay .85s cubic-bezier(.2,.8,.2,1)}
+  .support-launcher-wrap.playful::before{animation:supportRainbowGlow 1.8s linear infinite;opacity:.9;filter:blur(10px)}
+  .support-speech{animation:supportSpeechIn .35s ease both}
+  @keyframes supportCuteFloat{0%,100%{transform:translateY(0) rotate(0) scale(1)}25%{transform:translateY(-5px) rotate(-4deg) scale(1.035)}50%{transform:translateY(-2px) rotate(3deg) scale(1.015)}75%{transform:translateY(-6px) rotate(-2deg) scale(1.04)}}
+  @keyframes supportCuteTilt{0%,100%{transform:rotate(0) scale(1)}30%{transform:rotate(-5deg) scale(1.035)}65%{transform:rotate(5deg) scale(1.035)}}
+  @keyframes supportCutePlay{0%{transform:scale(1) rotate(0)}22%{transform:scale(.82) rotate(-14deg)}48%{transform:scale(1.18) rotate(12deg)}70%{transform:scale(.96) rotate(-5deg)}100%{transform:scale(1) rotate(0)}}
+  .support-launcher-wrap::after{content:"✦";position:absolute;right:-7px;top:-8px;color:#fff4a8;font-size:17px;text-shadow:0 0 9px #ffb8f4,0 0 15px #8eeaff;opacity:0;pointer-events:none;z-index:4}
+  .support-launcher-wrap.playful::after{animation:supportSparkle .9s ease-out}
+  @keyframes supportSparkle{0%{opacity:0;transform:scale(.2) rotate(0)}35%{opacity:1;transform:scale(1.35) rotate(90deg)}100%{opacity:0;transform:scale(.4) rotate(180deg)}}
+  .support-launcher-wrap.dragging{transition:none}
+  @media(prefers-reduced-motion:reduce){.support-btn,.support-btn img{animation:none!important}.support-launcher-wrap{transition:none!important}}
 /* ---------- Toast ---------- */
   .toast{
     position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
@@ -345,28 +359,27 @@
   var dragState=null;
   var suppressLauncherClick=false;
   var speech=document.getElementById('supportSpeech');
-  var helperMessages=['Hi! Need help? I’m here.','কোনো সমস্যা হচ্ছে? আমি সাহায্য করতে পারি!','Download করতে সাহায্য লাগলে বলো।','Need help with a page? Just tap me!','কোনো link কাজ না করলে জানাও।'];
-  var messageIndex=0;
-  if(speech)window.setInterval(function(){messageIndex=(messageIndex+1)%helperMessages.length;speech.textContent=helperMessages[messageIndex];},5200);
-  var orbitStart=performance.now();
-  function orbitHelper(now){
-    if(!dragState&&popup.hidden&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight,pad=10;
-      var maxX=Math.max(pad,window.innerWidth-w-pad),maxY=Math.max(pad,window.innerHeight-h-pad);
-      var minX=pad,minY=pad,dx=maxX-minX,dy=maxY-minY,perimeter=2*(dx+dy);
-      if(perimeter>0){
-        var distance=((now-orbitStart)/60000*perimeter)%perimeter,x=maxX,y=maxY;
-        if(distance<=dx){x=maxX-distance;y=maxY;}
-        else if((distance-=dx)<=dy){x=minX;y=maxY-distance;}
-        else if((distance-=dy)<=dx){x=minX+distance;y=minY;}
-        else{distance-=dx;x=maxX;y=minY+distance;}
-        launcherWrap.style.left=x+'px';launcherWrap.style.top=y+'px';launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
-      }
-    }
-    window.requestAnimationFrame(orbitHelper);
+  var helperMessages=['Hi! Need help? I’m here.','কোনো সমস্যা হচ্ছে? আমি সাহায্য করতে পারি!','Download করতে সাহায্য লাগলে বলো।','Need help with a page? Just tap me!','কোনো link কাজ না করলে জানাও।','আমি এখানেই আছি—কিছু লাগলে tap করো!','Ready when you need a hand ✨'];
+  var messageIndex=0,moveTimer=null,speechTimer=null;
+  function nextMessage(){
+    if(!speech)return;
+    var next=messageIndex;while(next===messageIndex&&helperMessages.length>1)next=Math.floor(Math.random()*helperMessages.length);
+    messageIndex=next;speech.textContent=helperMessages[messageIndex];
   }
-  window.requestAnimationFrame(orbitHelper);
-
+  function scheduleSpeech(){clearTimeout(speechTimer);speechTimer=window.setTimeout(function(){if(popup.hidden&&!dragState)nextMessage();scheduleSpeech();},6500+Math.random()*5500);}
+  scheduleSpeech();
+  function wander(){
+    clearTimeout(moveTimer);
+    if(!popup.hidden||dragState){moveTimer=window.setTimeout(wander,1200);return;}
+    var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight,pad=14;
+    var maxX=Math.max(pad,window.innerWidth-w-pad),maxY=Math.max(pad,window.innerHeight-h-pad);
+    launcherWrap.style.left=(pad+Math.random()*Math.max(0,maxX-pad))+'px';
+    launcherWrap.style.top=(pad+Math.random()*Math.max(0,maxY-pad))+'px';
+    launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
+    if(Math.random()<.7){launcherWrap.classList.remove('playful');void launcherWrap.offsetWidth;launcherWrap.classList.add('playful');}
+    moveTimer=window.setTimeout(wander,4200+Math.random()*6500);
+  }
+  moveTimer=window.setTimeout(wander,1800+Math.random()*1800);
   launcherWrap.addEventListener('pointerdown',function(event){
     if(!popup.hidden||event.button!==0)return;
     var rect=launcherWrap.getBoundingClientRect();
