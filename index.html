@@ -390,7 +390,7 @@
 </div>
 
 <div class="support-launcher-wrap" id="supportLauncherWrap">
-<div class="support-speech" id="supportSpeech" role="status" aria-live="polite">Hi! Need help? I’m here.</div>
+<div class="support-speech" id="supportSpeech" role="status" aria-live="polite">ডাউনলোডে সমস্যা? সহায়তার জন্য ক্লিক করুন।</div>
 <button class="support-btn" type="button" data-support-action="toggle" aria-controls="supportPopup" aria-expanded="false" aria-label="Open support options">
   <img src="https://i.postimg.cc/mkgy4m22/IMG-e3827ada-bb17-4b3e-a056-7ca8ca4d1d94.png" alt="">
 </button>
@@ -446,7 +446,7 @@
   var dragState=null;
   var suppressLauncherClick=false;
   var speech=document.getElementById('supportSpeech');
-  var helperMessages=['Hi! Need help? I’m here.','কোনো সমস্যা হচ্ছে? আমি সাহায্য করতে পারি!','Download করতে সাহায্য লাগলে বলো।','Need help with a page? Just tap me!','কোনো link কাজ না করলে জানাও।','আমি এখানেই আছি—কিছু লাগলে tap করো!','Ready when you need a hand ✨'];
+  var helperMessages=['ডাউনলোডে সমস্যা? সহায়তার জন্য ক্লিক করুন।'];
   var messageIndex=0,moveTimer=null,speechTimer=null;
   function nextMessage(){
     if(!speech)return;
