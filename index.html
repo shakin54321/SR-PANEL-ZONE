@@ -245,8 +245,11 @@
   .support-option.disabled{opacity:.58;cursor:default}
   .support-option.disabled:hover{transform:none;background:rgba(255,255,255,.045);border-color:rgba(150,180,220,.16)}
   @media(max-width:420px){.support-popup{padding-left:14px;padding-right:14px}.support-panel{width:100%}}
-  .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.94);color:#182235;font-size:12px;line-height:1.35;font-weight:750;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.9);pointer-events:none;animation:supportSpeechIn .35s ease both;z-index:3}
-  .support-speech::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.94)}
+  .support-speech{position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:max-content;max-width:min(220px,68vw);padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.13);color:#f5fbff;border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(18px) saturate(155%);-webkit-backdrop-filter:blur(18px) saturate(155%);font-size:12px;line-height:1.35;font-weight:750;text-align:center;text-shadow:0 1px 5px rgba(0,0,0,.35);box-shadow:0 8px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.22);pointer-events:none;animation:supportSpeechIn .35s ease both,supportBubbleFloat 3.8s ease-in-out infinite;z-index:3}
+  .support-speech::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:rgba(255,255,255,.13);filter:drop-shadow(0 2px 1px rgba(255,255,255,.18))}
+  @keyframes supportBubbleFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
+  @keyframes supportBubblePop{0%{scale:.7;opacity:0}65%{scale:1.06;opacity:1}100%{scale:1;opacity:1}}
+  .support-launcher-wrap.playful .support-speech{animation:supportSpeechIn .3s ease both,supportBubblePop .5s cubic-bezier(.2,.8,.2,1)}
   @keyframes supportSpeechIn{from{opacity:0;transform:translate(-50%,7px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
   .support-launcher-wrap{transition:left 2.7s cubic-bezier(.22,.75,.25,1),top 2.7s cubic-bezier(.22,.75,.25,1),right .2s,bottom .2s}
   .support-btn{transform-origin:50% 60%;animation:supportCuteFloat 3.1s ease-in-out infinite}
@@ -370,12 +373,12 @@
   scheduleSpeech();
   function findSafePosition(){
     var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight;
-    var margin=76, minX=margin,minY=margin;
+    var margin=100, minX=margin,minY=margin;
     var maxX=window.innerWidth-w-margin,maxY=window.innerHeight-h-margin;
     if(maxX<minX||maxY<minY)return null;
     var obstacles=Array.from(document.querySelectorAll('a,button,input,select,textarea,[role="button"],[role="link"]'))
       .filter(function(el){return !launcherWrap.contains(el)&&!popup.contains(el)&&el.getClientRects().length;})
-      .map(function(el){var r=el.getBoundingClientRect();return {left:r.left-18,right:r.right+18,top:r.top-18,bottom:r.bottom+18};});
+      .map(function(el){var r=el.getBoundingClientRect();return {left:r.left-28,right:r.right+28,top:r.top-28,bottom:r.bottom+28};});
     for(var attempt=0;attempt<55;attempt++){
       var x=minX+Math.random()*(maxX-minX),y=minY+Math.random()*(maxY-minY);
       var clear=obstacles.every(function(r){return x+w<=r.left||x>=r.right||y+h<=r.top||y>=r.bottom;});
@@ -394,7 +397,7 @@
     }
     moveTimer=window.setTimeout(wander,5200+Math.random()*7800);
   }
-  moveTimer=window.setTimeout(wander,1800+Math.random()*1800);
+  moveTimer=window.setTimeout(wander,120+Math.random()*180);
   launcherWrap.addEventListener('pointerdown',function(event){
     if(!popup.hidden||event.button!==0)return;
     var rect=launcherWrap.getBoundingClientRect();
@@ -406,7 +409,7 @@
     var dx=event.clientX-dragState.startX,dy=event.clientY-dragState.startY;
     if(Math.abs(dx)+Math.abs(dy)>5)dragState.moved=true;
     if(!dragState.moved)return;
-    var edge=76;
+    var edge=100;
     var maxLeft=Math.max(edge,window.innerWidth-launcherWrap.offsetWidth-edge);
     var maxTop=Math.max(edge,window.innerHeight-launcherWrap.offsetHeight-edge);
     launcherWrap.style.left=Math.min(maxLeft,Math.max(edge,dragState.left+dx))+'px';
