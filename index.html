@@ -50,18 +50,35 @@
     -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
             mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
   }
-  /* ---------- Cinematic purple lightning background ---------- */
+  /* ---------- Living purple lightning storm ---------- */
   .bg .lightning-field{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
-  .bg .lightning-field svg{width:100%;height:100%;display:block}
-  .bg .lightning-core{fill:none;stroke:#f2eaff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:1;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 15px #b56bff)}
-  .bg .lightning-glow{fill:none;stroke:#8b35ff;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:1;filter:drop-shadow(0 0 12px #8b35ff) drop-shadow(0 0 30px #7025ff)}
-  .bg .bolt-a{animation:purpleStrikeA 8.7s linear infinite}
-  .bg .bolt-b{animation:purpleStrikeB 11.3s linear -4.1s infinite}
-  .bg .bolt-c{animation:purpleStrikeC 13.1s linear -7.4s infinite}
-  @keyframes purpleStrikeA{0%,71%,76%,100%{opacity:0}72%{opacity:.95}73%{opacity:.18}74%{opacity:.82}75%{opacity:0}}
-  @keyframes purpleStrikeB{0%,62%,68%,100%{opacity:0}63%{opacity:.8}64%{opacity:.12}66%{opacity:.95}67%{opacity:0}}
-  @keyframes purpleStrikeC{0%,79%,84%,100%{opacity:0}80%{opacity:.9}81%{opacity:.2}82%{opacity:.72}83%{opacity:0}}
-  @media(prefers-reduced-motion:reduce){.bg .lightning-field *{animation:none!important}.bg .lightning-field .bolt-a,.bg .lightning-field .bolt-b,.bg .lightning-field .bolt-c{opacity:.38!important}}
+  .bg .lightning-field svg{width:100%;height:100%;display:block;overflow:visible}
+  .bg .storm-smoke{position:absolute;inset:-18%;opacity:.58;pointer-events:none;background:
+    radial-gradient(ellipse at 18% 24%,rgba(112,35,210,.28),transparent 34%),
+    radial-gradient(ellipse at 78% 36%,rgba(81,35,180,.24),transparent 31%),
+    radial-gradient(ellipse at 48% 78%,rgba(151,65,255,.2),transparent 38%),
+    radial-gradient(ellipse at 8% 72%,rgba(72,31,145,.2),transparent 28%);
+    background-size:145% 145%;animation:stormSmokeDrift 19s ease-in-out infinite alternate;mix-blend-mode:screen}
+  .bg .storm-smoke:after{content:"";position:absolute;inset:0;background:
+    radial-gradient(ellipse at 72% 16%,rgba(194,145,255,.13),transparent 24%),
+    radial-gradient(ellipse at 28% 58%,rgba(117,49,226,.16),transparent 30%);
+    animation:stormSmokeFlow 13s ease-in-out -5s infinite alternate}
+  .bg .storm-main{opacity:.86;animation:mainBoltPulse 3.8s ease-in-out infinite}
+  .bg .storm-branches{opacity:0;animation:branchFlash 5.4s ease-in-out infinite}
+  .bg .branch-two{animation-delay:-1.7s}
+  .bg .branch-three{animation-delay:-3.2s}
+  .bg .branch-four{animation-delay:-.8s}
+  .bg .lightning-glow{fill:none;stroke:#8534ff;stroke-width:17;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 12px #8b35ff) drop-shadow(0 0 28px #7025ff)}
+  .bg .lightning-core{fill:none;stroke:#f5eaff;stroke-width:3.1;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 17px #c18aff)}
+  .bg .main-energy{fill:none;stroke:#fff;stroke-width:1.4;stroke-linecap:round;stroke-dasharray:18 42;animation:energyRun 1.25s linear infinite;filter:drop-shadow(0 0 8px #fff)}
+  .bg .medium-glow{fill:none;stroke:#9b55ff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 9px #a34dff) drop-shadow(0 0 22px #762cff)}
+  .bg .medium-core{fill:none;stroke:#eee1ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #fff)}
+  @keyframes mainBoltPulse{0%,100%{opacity:.7}45%{opacity:1}52%{opacity:.82}56%{opacity:1}}
+  @keyframes energyRun{to{stroke-dashoffset:-120}}
+  @keyframes branchFlash{0%,8%,100%{opacity:0}10%{opacity:.95}12%{opacity:.22}14%{opacity:.78}17%{opacity:0}}
+  @keyframes stormSmokeDrift{0%{transform:translate3d(-2%,1%,0) scale(1)}50%{transform:translate3d(2%,-2%,0) scale(1.08)}100%{transform:translate3d(-1%,2%,0) scale(1.04)}}
+  @keyframes stormSmokeFlow{0%{transform:translate3d(2%,2%,0) scale(.96);opacity:.45}100%{transform:translate3d(-2%,-2%,0) scale(1.08);opacity:.9}}
+  @media(prefers-reduced-motion:reduce){.bg .storm-smoke,.bg .storm-smoke:after,.bg .storm-main,.bg .storm-branches,.bg .main-energy{animation:none!important}.bg .storm-main{opacity:.9}.bg .storm-branches{opacity:.32}}
   .bg .scan{
     position:absolute;left:0;right:0;height:140px;top:-140px;
     background:linear-gradient(180deg,transparent,rgba(0,229,255,.06),transparent);
@@ -382,19 +399,27 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 <div class="bg" aria-hidden="true">
   <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
   <div class="grid"></div><div class="scan"></div>
+  <div class="storm-smoke"></div>
   <div class="lightning-field">
     <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
-      <g class="bolt-a">
-        <path class="lightning-glow" d="M185 -40 L340 185 L286 315 L455 440 L390 590 L560 770 L505 1040 M340 185 L445 225 L405 305"/>
-        <path class="lightning-core" d="M185 -40 L340 185 L286 315 L455 440 L390 590 L560 770 L505 1040 M340 185 L445 225 L405 305"/>
+      <g class="storm-main">
+        <path class="lightning-glow" d="M505 -45 L455 105 L535 205 L445 330 L555 445 L455 585 L535 720 L435 865 L485 1045"/>
+        <path class="lightning-core" d="M505 -45 L455 105 L535 205 L445 330 L555 445 L455 585 L535 720 L435 865 L485 1045"/>
+        <path class="main-energy" d="M505 -45 L455 105 L535 205 L445 330 L555 445 L455 585 L535 720 L435 865 L485 1045"/>
+        <path class="lightning-glow" d="M455 105 L350 165 L300 285 M535 205 L650 250 L715 365 M445 330 L330 390 L245 520 M555 445 L690 510 L770 650 M455 585 L330 660 L255 805 M535 720 L665 790 L735 930"/>
+        <path class="lightning-core" d="M455 105 L350 165 L300 285 M535 205 L650 250 L715 365 M445 330 L330 390 L245 520 M555 445 L690 510 L770 650 M455 585 L330 660 L255 805 M535 720 L665 790 L735 930"/>
       </g>
-      <g class="bolt-b">
-        <path class="lightning-glow" d="M850 -50 L720 165 L790 290 L625 455 L700 590 L555 760 L610 1040 M720 165 L610 215 L650 300"/>
-        <path class="lightning-core" d="M850 -50 L720 165 L790 290 L625 455 L700 590 L555 760 L610 1040 M720 165 L610 215 L650 300"/>
+      <g class="storm-branches">
+        <path class="medium-glow" d="M350 165 L245 190 L180 285 L95 330 M300 285 L365 345 L325 430 M650 250 L770 205 L835 285 L930 315 M715 365 L825 425 L900 510 M330 390 L205 430 L130 540 L55 585 M245 520 L320 575 L285 665 M690 510 L815 560 L875 665 L965 710 M770 650 L700 735 L760 825 M330 660 L210 735 L150 850 M665 790 L825 855 L900 965"/>
+        <path class="medium-core" d="M350 165 L245 190 L180 285 L95 330 M300 285 L365 345 L325 430 M650 250 L770 205 L835 285 L930 315 M715 365 L825 425 L900 510 M330 390 L205 430 L130 540 L55 585 M245 520 L320 575 L285 665 M690 510 L815 560 L875 665 L965 710 M770 650 L700 735 L760 825 M330 660 L210 735 L150 850 M665 790 L825 855 L900 965"/>
       </g>
-      <g class="bolt-c">
-        <path class="lightning-glow" d="M525 -60 L465 135 L540 245 L440 360 L510 475 L420 610 L470 760 L390 1040"/>
-        <path class="lightning-core" d="M525 -60 L465 135 L540 245 L440 360 L510 475 L420 610 L470 760 L390 1040"/>
+      <g class="storm-branches branch-two">
+        <path class="medium-glow" d="M485 95 L590 45 L680 95 M535 205 L590 320 L675 360 M445 330 L365 270 L285 285 M555 445 L485 510 L390 500 M455 585 L565 635 L635 730 M535 720 L455 790 L365 900"/>
+        <path class="medium-core" d="M485 95 L590 45 L680 95 M535 205 L590 320 L675 360 M445 330 L365 270 L285 285 M555 445 L485 510 L390 500 M455 585 L565 635 L635 730 M535 720 L455 790 L365 900"/>
+      </g>
+      <g class="storm-branches branch-three">
+        <path class="medium-glow" d="M455 105 L390 35 L315 15 M445 330 L520 285 L600 295 M555 445 L635 385 L735 390 M455 585 L375 535 L285 555 M435 865 L340 930 L255 980"/>
+        <path class="medium-core" d="M455 105 L390 35 L315 15 M445 330 L520 285 L600 295 M555 445 L635 385 L735 390 M455 585 L375 535 L285 555 M435 865 L340 930 L255 980"/>
       </g>
     </svg>
   </div>
