@@ -405,10 +405,11 @@
     var dx=event.clientX-dragState.startX,dy=event.clientY-dragState.startY;
     if(Math.abs(dx)+Math.abs(dy)>5)dragState.moved=true;
     if(!dragState.moved)return;
-    var maxLeft=Math.max(0,window.innerWidth-launcherWrap.offsetWidth);
-    var maxTop=Math.max(0,window.innerHeight-launcherWrap.offsetHeight);
-    launcherWrap.style.left=Math.min(maxLeft,Math.max(0,dragState.left+dx))+'px';
-    launcherWrap.style.top=Math.min(maxTop,Math.max(0,dragState.top+dy))+'px';
+    var edge=76;
+    var maxLeft=Math.max(edge,window.innerWidth-launcherWrap.offsetWidth-edge);
+    var maxTop=Math.max(edge,window.innerHeight-launcherWrap.offsetHeight-edge);
+    launcherWrap.style.left=Math.min(maxLeft,Math.max(edge,dragState.left+dx))+'px';
+    launcherWrap.style.top=Math.min(maxTop,Math.max(edge,dragState.top+dy))+'px';
     launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
     launcherWrap.classList.add('dragging');
   });
