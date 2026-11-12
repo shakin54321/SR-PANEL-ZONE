@@ -53,15 +53,15 @@
   /* ---------- Cinematic purple lightning background ---------- */
   .bg .lightning-field{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
   .bg .lightning-field svg{width:100%;height:100%;display:block}
-  .bg .lightning-core{fill:none;stroke:#f2eaff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 15px #b56bff)}
-  .bg .lightning-glow{fill:none;stroke:#8b35ff;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:0;filter:drop-shadow(0 0 12px #8b35ff) drop-shadow(0 0 30px #7025ff)}
+  .bg .lightning-core{fill:none;stroke:#f2eaff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:1;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 15px #b56bff)}
+  .bg .lightning-glow{fill:none;stroke:#8b35ff;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:1;filter:drop-shadow(0 0 12px #8b35ff) drop-shadow(0 0 30px #7025ff)}
   .bg .bolt-a{animation:purpleStrikeA 8.7s linear infinite}
   .bg .bolt-b{animation:purpleStrikeB 11.3s linear -4.1s infinite}
   .bg .bolt-c{animation:purpleStrikeC 13.1s linear -7.4s infinite}
   @keyframes purpleStrikeA{0%,71%,76%,100%{opacity:0}72%{opacity:.95}73%{opacity:.18}74%{opacity:.82}75%{opacity:0}}
   @keyframes purpleStrikeB{0%,62%,68%,100%{opacity:0}63%{opacity:.8}64%{opacity:.12}66%{opacity:.95}67%{opacity:0}}
   @keyframes purpleStrikeC{0%,79%,84%,100%{opacity:0}80%{opacity:.9}81%{opacity:.2}82%{opacity:.72}83%{opacity:0}}
-  @media(prefers-reduced-motion:reduce){.bg .lightning-field *{animation:none!important;opacity:0!important}}
+  @media(prefers-reduced-motion:reduce){.bg .lightning-field *{animation:none!important}.bg .lightning-field .bolt-a,.bg .lightning-field .bolt-b,.bg .lightning-field .bolt-c{opacity:.38!important}}
   .bg .scan{
     position:absolute;left:0;right:0;height:140px;top:-140px;
     background:linear-gradient(180deg,transparent,rgba(0,229,255,.06),transparent);
