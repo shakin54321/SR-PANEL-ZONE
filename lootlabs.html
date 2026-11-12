@@ -242,7 +242,7 @@
   @keyframes supportBubblePop{0%{scale:.7;opacity:0}65%{scale:1.06;opacity:1}100%{scale:1;opacity:1}}
   .support-launcher-wrap.playful .support-speech{animation:supportSpeechIn .3s ease both,supportBubblePop .5s cubic-bezier(.2,.8,.2,1)}
   @keyframes supportSpeechIn{from{opacity:0;transform:translate(-50%,7px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-  .support-launcher-wrap{transition:left 2.7s cubic-bezier(.22,.75,.25,1),top 2.7s cubic-bezier(.22,.75,.25,1),right .2s,bottom .2s}
+  .support-launcher-wrap{opacity:0;transition:opacity .85s ease,left 2.7s cubic-bezier(.22,.75,.25,1),top 2.7s cubic-bezier(.22,.75,.25,1),right .2s,bottom .2s}.support-launcher-wrap.support-ready{opacity:1;animation:supportSpawnIn .9s cubic-bezier(.2,.8,.2,1) both}@keyframes supportSpawnIn{0%{opacity:0;filter:blur(5px)}65%{opacity:1;filter:blur(0);transform:scale(1.06)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
   .support-btn{transform-origin:50% 60%;animation:supportCuteFloat 3.1s ease-in-out infinite}
   .support-btn img{animation:supportCuteTilt 4.6s ease-in-out infinite}
   .support-launcher-wrap.playful .support-btn{animation:supportCutePlay .85s cubic-bezier(.2,.8,.2,1)}
@@ -396,7 +396,11 @@
     }
     moveTimer=window.setTimeout(wander,5200+Math.random()*7800);
   }
-  moveTimer=window.setTimeout(wander,120+Math.random()*180);
+  var firstSpot=findSafePosition();
+  if(firstSpot){launcherWrap.style.left=firstSpot.x+'px';launcherWrap.style.top=firstSpot.y+'px';launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';}
+  void launcherWrap.offsetWidth;
+  window.requestAnimationFrame(function(){launcherWrap.classList.add('support-ready');});
+  moveTimer=window.setTimeout(wander,4200+Math.random()*1800);
   launcherWrap.addEventListener('pointerdown',function(event){
     if(!popup.hidden||event.button!==0)return;
     var rect=launcherWrap.getBoundingClientRect();
