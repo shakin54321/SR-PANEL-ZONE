@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="same-origin">
+<meta name="theme-color" content="#090d17">
+<title>SR Admin Control</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 8% 0%,#142c50 0,transparent 40%),#090d17;color:#edf4ff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding:22px}.wrap{max-width:900px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:10px 0 28px}.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#3478ff,#8658ff)}.mark svg{width:22px}.eyebrow{color:#7fa9ff;font-size:10px;font-weight:800;letter-spacing:.18em}.title{margin:5px 0 0;font-size:25px;letter-spacing:-.04em}.logout{border:1px solid #30435f;background:#111b2c;color:#c9d7eb;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer}.hero{padding:23px;border:1px solid #273b5a;border-radius:22px;background:linear-gradient(130deg,#14233c,#101729);margin-bottom:18px}.hero h2{margin:0 0 8px;font-size:18px}.hero p{margin:0;color:#8ea2c0;font-size:13px;line-height:1.65}.safe{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:7px 10px;border:1px solid #1e765c;border-radius:999px;color:#76e9bc;font-size:10px;font-weight:800;letter-spacing:.08em}.safe i{width:6px;height:6px;border-radius:50%;background:#35dfa0;box-shadow:0 0 10px #35dfa0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{padding:20px;border:1px solid #263753;border-radius:20px;background:rgba(16,25,42,.92)}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.card h3{margin:0;font-size:16px}.tag{padding:6px 8px;border-radius:8px;background:#172a47;color:#8eb5ff;font-size:10px;font-weight:800}.sub{margin:9px 0 16px;color:#7f92af;font-size:12px}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.step{min-width:0;padding:11px 4px;border:1px solid #30405b;border-radius:11px;background:#0c1423;color:#8193ad;text-align:center;font-size:11px;font-weight:800}.step.done{border-color:#167c5d;background:#0e2b27;color:#6ce2b2}.step b{display:block;margin-bottom:4px;font-size:14px}.bar{height:6px;margin:15px 0 17px;border-radius:20px;background:#202d43;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#2e9fff,#8a5cff);transition:width .25s}.actions{display:flex;flex-wrap:wrap;gap:8px}.action{border:1px solid #35517a;border-radius:11px;padding:10px 12px;background:#172a46;color:#d8e7ff;font-size:11px;font-weight:800;cursor:pointer}.action.primary{border-color:transparent;background:linear-gradient(110deg,#347cff,#7657f5);color:white}.action:disabled{opacity:.45;cursor:not-allowed}.result{min-height:18px;margin-top:12px;color:#7de4b6;font-size:11px}.note{margin-top:18px;padding:15px;border:1px solid #6c5429;border-radius:14px;background:#241d12;color:#d9bd82;font-size:11px;line-height:1.65}.note strong{color:#f3dba8}.bottom{margin:22px 0;color:#586b88;font-size:10px;text-align:center;letter-spacing:.1em}@media(max-width:650px){body{padding:15px}.grid{grid-template-columns:1fr}.title{font-size:21px}.hero{padding:18px}.card{padding:17px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+ <div class="brand"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="eyebrow">SR PANEL ZONE</div><h1 class="title">Admin Control</h1></div></div>
+ <button class="logout" id="logout">Log out</button>
+</header>
+<section class="hero">
+ <h2>Private test console</h2>
+ <p>Run Linkvertise and LootLabs step simulations here without completing the live provider tasks yourself.</p>
+ <span class="safe"><i></i> ISOLATED TEST MODE · LIVE USERS UNAFFECTED</span>
+</section>
+<section class="grid">
+ <article class="card" data-provider="lv">
+  <div class="cardhead"><h3>Linkvertise</h3><span class="tag">5 TEST STEPS</span></div>
+  <p class="sub">Simulate the flow without changing live verification.</p>
+  <div class="steps" id="lvSteps"></div><div class="bar"><div class="fill" id="lvFill"></div></div>
+  <div class="actions"><button class="action" data-action="next" data-provider="lv">Complete next step</button><button class="action primary" data-action="all" data-provider="lv">Complete all</button><button class="action" data-action="reset" data-provider="lv">Reset test</button></div>
+  <p class="result" id="lvResult"></p>
+ </article>
+ <article class="card" data-provider="ll">
+  <div class="cardhead"><h3>LootLabs</h3><span class="tag">5 TEST STEPS</span></div>
+  <p class="sub">Simulate the flow without changing live verification.</p>
+  <div class="steps" id="llSteps"></div><div class="bar"><div class="fill" id="llFill"></div></div>
+  <div class="actions"><button class="action" data-action="next" data-provider="ll">Complete next step</button><button class="action primary" data-action="all" data-provider="ll">Complete all</button><button class="action" data-action="reset" data-provider="ll">Reset test</button></div>
+  <p class="result" id="llResult"></p>
+ </article>
+</section>
+<div class="note"><strong>Important:</strong> These controls only update this admin test screen. They do not write to the visitor progress database, alter anyone’s progress, or bypass live Linkvertise/LootLabs verification.</div>
+<footer class="bottom">PRIVATE ADMIN SESSION · AUTO EXPIRES AFTER 6 HOURS</footer>
+</main>
+<script>
+(async function(){
+ const auth=await fetch('/api/admin/session',{cache:'no-store',credentials:'same-origin'}).catch(()=>null);
+ const data=auth&&auth.ok?await auth.json().catch(()=>({})): {};
+ if(!data.ok){location.replace('/sr-control/');return;}
+ const key='sr_admin_test_session_v1';
+ let state={lv:0,ll:0};
+ try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved&&Number.isInteger(saved.lv)&&Number.isInteger(saved.ll)){state.lv=Math.max(0,Math.min(5,saved.lv));state.ll=Math.max(0,Math.min(5,saved.ll));}}catch(e){}
+ function save(){sessionStorage.setItem(key,JSON.stringify(state));}
+ function render(provider){
+  const value=state[provider],prefix=provider==='lv'?'lv':'ll';
+  document.getElementById(prefix+'Steps').innerHTML=Array.from({length:5},(_,i)=>'<div class="step '+(i<value?'done':'')+'"><b>'+(i<value?'✓':i+1)+'</b>Step</div>').join('');
+  document.getElementById(prefix+'Fill').style.width=(value*20)+'%';
+  document.getElementById(prefix+'Result').textContent=value===5?'✓ Test flow completed — final UI state ready.':value+' of 5 test steps completed.';
+ }
+ ['lv','ll'].forEach(render);
+ document.addEventListener('click',function(event){
+  const button=event.target.closest('[data-action]');if(!button)return;
+  const provider=button.dataset.provider,action=button.dataset.action;
+  if(!['lv','ll'].includes(provider))return;
+  if(action==='next')state[provider]=Math.min(5,state[provider]+1);
+  if(action==='all')state[provider]=5;
+  if(action==='reset')state[provider]=0;
+  save();render(provider);
+ });
+ document.getElementById('logout').addEventListener('click',async function(){
+  await fetch('/api/admin/logout',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'}}).catch(()=>{});
+  sessionStorage.removeItem(key);location.replace('/sr-control/');
+ });
+})();
+</script>
+</body>
+</html>
