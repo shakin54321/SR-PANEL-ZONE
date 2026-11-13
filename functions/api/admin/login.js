@@ -1,8 +1,8 @@
 import { json, sha256Hex, sameOrigin, sessionCookie } from "../../_utils/admin-auth.js";
 
 const PASSWORD_SALT = "k7RlBActF88SOJIKT1lNzg==";
-const PASSWORD_HASH = "bx4Eusev4qtbHM2MNGi9weGZaIiz49MQsyA0Cq2IDyE=";
-const PASSWORD_ITERATIONS = 310000;
+const PASSWORD_HASH = "JlL+brEnxhExXlRMdXSYPfYqd9E+dLe4QYhaZ7HeFWs=";
+const PASSWORD_ITERATIONS = 100000;
 
 function decodeBase64(value) {
   return Uint8Array.from(atob(value), c => c.charCodeAt(0));
