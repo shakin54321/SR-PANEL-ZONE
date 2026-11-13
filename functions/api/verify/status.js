@@ -1,11 +1,8 @@
-export async function onRequestGet({ request, env }) {
-  const cookies = (request.headers.get("Cookie") || "").split(";").map(x=>x.trim());
-  const sid = cookies.find(x=>x.startsWith("ll_sid="))?.slice(7);
-  if (!sid) return Response.json({ok:true,verified:false},{headers:{"Cache-Control":"no-store"}});
-  const row = await env.VERIFY_DB.prepare(
-    "SELECT step, expires_at, verified_at FROM sessions WHERE id=? AND provider='ll'"
-  ).bind(sid).first();
-  const now = Math.floor(Date.now()/1000);
-  const verified = !!row && row.expires_at >= now && !!row.verified_at;
-  return Response.json({ok:true,verified,step:row?.step || null},{headers:{"Cache-Control":"no-store"}});
+export async function onRequestGet({request,env}){
+ const u=new URL(request.url),provider=u.searchParams.get("provider")==="lv"?"lv":"ll";
+ const cookies=(request.headers.get("Cookie")||"").split(";").map(x=>x.trim());
+ const visitor=cookies.find(x=>x.startsWith(provider+"_visitor="))?.slice((provider+"_visitor=").length);
+ if(!visitor)return Response.json({ok:true,step:1},{headers:{"Cache-Control":"no-store"}});
+ const p=await env.VERIFY_DB.prepare("SELECT current_step FROM progress WHERE visitor_id=? AND provider=?").bind(visitor,provider).first();
+ return Response.json({ok:true,step:p?.current_step||1},{headers:{"Cache-Control":"no-store"}});
 }
