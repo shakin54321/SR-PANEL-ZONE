@@ -2,7 +2,8 @@ export async function onRequestPost({request,env}){
  const cookies=(request.headers.get("Cookie")||"").split(";").map(x=>x.trim());
  const sid=cookies.find(x=>x.startsWith("lv_sid="))?.slice(7);
  const visitor=cookies.find(x=>x.startsWith("lv_visitor="))?.slice(11);
- if(!sid||!visitor||!env.LINKVERTISE_AUTH_TOKEN)return Response.json({ok:false,error:"Verification unavailable"},{status:503});
+ if(!sid||!visitor)return Response.json({ok:false,error:"Verification session missing. Start the Linkvertise step again."},{status:401});
+ if(!env.LINKVERTISE_AUTH_TOKEN)return Response.json({ok:false,error:"Server token is not available in this deployment."},{status:503});
  let body;try{body=await request.json()}catch{return Response.json({ok:false},{status:400})}
  const step=Number(body.step),hash=String(body.hash||"");
  if(!Number.isInteger(step)||step<2||step>5||!/^[a-f0-9]{64}$/i.test(hash))return Response.json({ok:false},{status:400});
