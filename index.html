@@ -1059,6 +1059,12 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
       }
       return;
     }
+    // LootLabs: only accept a return navigation coming from the LootLabs domain.
+    // This prevents reopening the homepage after closing the browser from advancing a step.
+    var lootlabsReferrerHost = '';
+    try { lootlabsReferrerHost = new URL(document.referrer).hostname.toLowerCase(); } catch (e) {}
+    if (lootlabsReferrerHost !== 'loot-link.com' && !lootlabsReferrerHost.endsWith('.loot-link.com')) return;
+
     var state = JSON.parse(localStorage.getItem('safelink_progress_v3') || 'null');
     if (!state || !Number.isInteger(state.step) || state.step < 1 || state.step > 4 ||
         typeof state.pendingAt !== 'number' || typeof state.awayAt !== 'number' ||
