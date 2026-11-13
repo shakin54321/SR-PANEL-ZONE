@@ -35,7 +35,7 @@
   if(!/^[A-Za-z0-9_-]{40,60}$/.test(token||'')){
    const bytes=crypto.getRandomValues(new Uint8Array(32));
    let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);
-   token=btoa(binary).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/g,'');
+   token=btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
    localStorage.setItem('sr_admin_device_v1',token);
   }
   return token;
