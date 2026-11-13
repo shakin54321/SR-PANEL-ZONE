@@ -364,6 +364,16 @@
 /* Performance: pause decorative CSS animations while this tab is hidden. */
 html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animation-play-state:paused!important}
 </style>
+<script>
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    if(q.get('gate')==='lv' && q.get('hash')){
+      location.replace('/linkvertise?'+q.toString());
+    }
+  }catch(e){}
+})();
+</script>
 </head>
 
 <body>
