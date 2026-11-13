@@ -282,10 +282,6 @@
     transition:all .3s ease;z-index:50;
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
-  .verification-status{display:none;width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(0,229,255,.35);color:var(--text);font-size:.82rem;line-height:1.5;text-align:center;overflow-wrap:anywhere}
-  .verification-status.show{display:block}
-  .verification-status.error{border-color:rgba(255,100,100,.65);color:#ffdada}
-  .verification-status.success{border-color:rgba(0,255,157,.55);color:#baffdf}
 
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation:none !important;transition:none !important}
@@ -1043,7 +1039,6 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
 
   <section class="card action">
     <div class="step-label" id="stepLabel">Step <b>1</b> / 5</div>
-    <div class="verification-status" id="verificationStatus" role="status" aria-live="polite"></div>
     <a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a>
     <a class="btn final" id="secondDownloadBtn" href="#" rel="noopener noreferrer" hidden><img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">M1NX VIP [New v2]</span></a>
   </section>
@@ -1198,110 +1193,256 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
 (function () {
   'use strict';
 
+  /* =====================================================================
+     [EDIT HERE] SETTINGS
+     ===================================================================== */
+
+  // [EDIT HERE] PASTE YOUR LINKVERTISE TASK LINKS HERE
   const linkvertiseLinks = {
-    1:'https://link-center.net/8767038/pOulHrcpE6Ff',
-    2:'https://link-center.net/8767038/U21ecnaPJsIr',
-    3:'https://link-target.net/8767038/mdoSczwAg8BK',
-    4:'https://direct-link.net/8767038/I0zvMow6WLdz'
+    1: 'https://link-center.net/8767038/pOulHrcpE6Ff',
+    2: 'https://link-center.net/8767038/U21ecnaPJsIr',
+    3: 'https://link-target.net/8767038/mdoSczwAg8BK',
+    4: 'https://direct-link.net/8767038/I0zvMow6WLdz'
   };
-  const FINAL_DOWNLOAD_LINK='https://www.mediafire.com/file/21mfgus1qlo7gdl/XYZ+V2.8.apk/file';
-  const SECOND_DOWNLOAD_LINK='https://www.mediafire.com/file/rldd0qfmg189xht/M1NX+VIP.apk/file';
-  const FILE_NAME='Linkvertise';
-  const TOTAL_STEPS=5;
-  const CHECK_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-  const LOCK_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2"/></svg>';
-  const $=id=>document.getElementById(id);
-  const stepItems=$('stepList').children,btn=$('mainBtn'),secondBtn=$('secondDownloadBtn');
-  $('fileName').textContent=FILE_NAME;
-  let step=1,working=false;
-  let toastTimer;
-  function toast(msg){
-    const t=$('toast');t.textContent=msg;t.classList.add('show');
-    clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),9000);
-  }
-  function verificationStatus(msg,type){
-    const el=$('verificationStatus');if(!el)return;
-    el.textContent=msg;el.className='verification-status show '+(type||'');
-  }
-  function render(){
-    for(let i=0;i<TOTAL_STEPS;i++){
-      const n=i+1;stepItems[i].className=n<step?'done':n===step?'active':'locked';
-      if(n<step)stepItems[i].innerHTML=CHECK_SVG;
-      else if(n===step)stepItems[i].textContent=String(n);
-      else{stepItems[i].innerHTML=LOCK_SVG;stepItems[i].setAttribute('aria-label','Step '+n+' locked');}
+
+  // [EDIT HERE] PASTE YOUR REAL DOWNLOAD LINK HERE (button on Step 5)
+  // ⚠️ এখানে আপনার আসল ডাউনলোড লিংকটি বসাতে ভুলবেন না (যেমন: Mega, Mediafire বা Google Drive এর লিংক)
+  const FINAL_DOWNLOAD_LINK = 'https://www.mediafire.com/file/21mfgus1qlo7gdl/XYZ+V2.8.apk/file';
+  const SECOND_DOWNLOAD_LINK = 'https://www.mediafire.com/file/rldd0qfmg189xht/M1NX+VIP.apk/file';
+
+  // [EDIT HERE] File name shown on the card
+  const FILE_NAME = 'Linkvertise';
+
+  // [EDIT HERE] Any random text. Used to sign saved progress so hand-edited
+  // localStorage is detected and reset. Change it to something of your own.
+  const SECRET_SALT = 'change-me-7f3a9c';
+
+  // Minimum seconds between clicking START and a valid return from Linkvertise.
+  // Stops someone from typing ?step=2 right after clicking. Set 0 to disable.
+  const MIN_AWAY_SECONDS = 10;
+
+  /* ===================== END OF SETTINGS ===================== */
+
+  var TOTAL_STEPS = 5;
+  var STORAGE_KEY = 'linkvertise_progress_v1';
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  var LOCK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2"/></svg>';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stepItems = $('stepList').children;
+  var btn = $('mainBtn');
+  var secondBtn = $('secondDownloadBtn');
+  $('fileName').textContent = FILE_NAME;
+
+  // ---------- Tiny signed storage (cyrb53 hash) ----------
+  function hash(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
     }
-    $('stepsFill').style.width=((step-1)/(TOTAL_STEPS-1)*100)+'%';
-    $('stepLabel').innerHTML='Step <b>'+step+'</b> / '+TOTAL_STEPS;
-    btn.classList.remove('loading');btn.style.pointerEvents='';
-    if(step===TOTAL_STEPS){
-      btn.innerHTML='<img class="btn-logo" src="https://i.postimg.cc/nLRZYXbp/Screenshot-2026-11-11-15-18-30-96-f6753c6c6bd60d52382a99e787ed0d57.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">XYZ 2.1 [100% Antiban]</span>';
-      btn.classList.add('final');btn.href=FINAL_DOWNLOAD_LINK;
-      secondBtn.innerHTML='<img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">M1NX VIP [New v2]</span>';
-      secondBtn.hidden=false;secondBtn.href=SECOND_DOWNLOAD_LINK;
-    }else{
-      btn.textContent='Start';btn.classList.remove('final');btn.href='#';
-      secondBtn.hidden=true;secondBtn.href='#';
-    }
-    try{
-      const currentQuery=new URLSearchParams(location.search);
-      // Keep Linkvertise's one-time callback hash intact until the server verifies it.
-      if(!currentQuery.has('hash')) history.replaceState(null,'',location.pathname+(currentQuery.get('gate')==='lv'?'?gate=lv&step='+step:'?step='+step));
-    }catch(e){}
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
   }
-  async function refresh(){
-    try{
-      const r=await fetch('/api/verify/status?provider=lv',{cache:'no-store',credentials:'same-origin'});
-      const d=await r.json();if(d&&d.ok&&Number.isInteger(d.step))step=Math.min(5,Math.max(1,d.step));
-    }catch(e){}
-    render();
+  function sign(step, pendingAt, savedAt, awayAt) {
+    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + awayAt + '|' + SECRET_SALT);
   }
-  async function startTask(){
-    if(working||step>=5)return;
-    working=true;btn.classList.add('loading');btn.innerHTML='<span class="spinner"></span>Connecting';
-    try{
-      const r=await fetch('/api/verify/start',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({provider:'lv',step})});
-      const d=await r.json();
-      if(!r.ok||!d.ok||!d.url)throw new Error(d.error||'Could not start task');
-      location.assign(d.url);
-    }catch(e){working=false;render();toast(e.message||'Verification service unavailable.');}
+  function legacySign(step, pendingAt, savedAt) {
+    return hash(step + '|' + pendingAt + '|' + savedAt + '|' + SECRET_SALT);
   }
-  btn.addEventListener('click',function(e){
-    if(step===TOTAL_STEPS)return;
-    e.preventDefault();startTask();
-  });
-  secondBtn.addEventListener('click',function(e){
-    if(step!==TOTAL_STEPS){e.preventDefault();toast('দুটি Download option পেতে আগে ৫টি Step complete করুন।');}
-  });
-  async function verifyReturn(){
-    const q=new URLSearchParams(location.search),targetStep=Number(q.get('step')),hash=q.get('hash');
-    // The server validates the pending session, step and one-time hash. Keep the
-    // callback URL intact on failure so the reason can be diagnosed/retried.
-    if(!hash){
-      if(q.has('gate')||q.has('step')) toast('Linkvertise থেকে verification hash ফেরত আসেনি। Target URL ও Anti-Bypass সেটিং আবার পরীক্ষা করতে হবে।');
-      return;
-    }
-    if(!Number.isInteger(targetStep)||targetStep<2||targetStep>5){
-      toast('Linkvertise return URL-এ step তথ্য পাওয়া যায়নি।');
-      return;
-    }
-    try{
-      const r=await fetch('/api/linkvertise/verify',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({step:targetStep,hash})});
-      const d=await r.json();
-      if(!r.ok||!d.ok){
-        const msg='Verification failed: '+(d.error||('HTTP '+r.status));verificationStatus(msg+' (HTTP '+r.status+')','error');toast(msg);
-        return;
+
+  // Each visitor's 5-minute timer pauses while they are away on Linkvertise.
+  var SAVE_TTL_MS = 5 * 60 * 1000;
+  var expiryTimer = null;
+  var state = loadState();
+
+  function loadState() {
+    try {
+      var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (s && Number.isInteger(s.step) && s.step >= 1 && s.step <= TOTAL_STEPS &&
+          typeof s.pendingAt === 'number' && typeof s.savedAt === 'number') {
+        var awayAt = typeof s.awayAt === 'number' ? s.awayAt : 0;
+        var validSignature = s.sig === sign(s.step, s.pendingAt, s.savedAt, awayAt) ||
+          (!awayAt && s.sig === legacySign(s.step, s.pendingAt, s.savedAt));
+        var age = Date.now() - s.savedAt;
+        var validAge = age >= 0 && (awayAt > 0 ? awayAt <= Date.now() : age < SAVE_TTL_MS);
+        if (validSignature && validAge) {
+          return { step: s.step, pendingAt: s.pendingAt, savedAt: s.savedAt, awayAt: awayAt };
+        }
       }
-      verificationStatus('Linkvertise task verified! Step '+targetStep+' unlocked.','success');toast('Linkvertise task verified!');
-      history.replaceState(null,'',location.pathname);
-      await refresh();
-    }catch(e){
-      const msg='Verification server-এর সাথে যোগাযোগ করা যায়নি। Callback URL অক্ষত রাখা হয়েছে।';verificationStatus(msg,'error');toast(msg);
+    } catch (e) {}
+    return { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+  }
+  function persistState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        step: state.step, pendingAt: state.pendingAt, savedAt: state.savedAt,
+        awayAt: state.awayAt, sig: sign(state.step, state.pendingAt, state.savedAt, state.awayAt)
+      }));
+    } catch (e) {}
+  }
+  function scheduleExpiry() {
+    if (expiryTimer) clearTimeout(expiryTimer);
+    expiryTimer = null;
+    if (state.awayAt || !state.savedAt) return; // Linkvertise time is paused.
+    var remaining = SAVE_TTL_MS - (Date.now() - state.savedAt);
+    if (remaining <= 0) {
+      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+      persistState();
+      render();
+      return;
+    }
+    expiryTimer = setTimeout(function () {
+      if (!state.awayAt && Date.now() - state.savedAt >= SAVE_TTL_MS) {
+        state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+        persistState();
+        render();
+      } else {
+        scheduleExpiry();
+      }
+    }, remaining);
+  }
+  function saveState() {
+    state.savedAt = Date.now();
+    persistState();
+    scheduleExpiry();
+  }
+  function resumeTimerAfterAway() {
+    if (!state.awayAt) return;
+    var awayDuration = Date.now() - state.awayAt;
+    if (awayDuration >= 0) state.savedAt += awayDuration;
+    state.awayAt = 0;
+    persistState();
+    scheduleExpiry();
+  }
+
+  function isConfigured(url) {
+    return typeof url === 'string' && /^https?:\/\//i.test(url) && !/PASTE/i.test(url) && !/your-actual-file-link/i.test(url);
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
+  }
+
+  function setLoading(on) {
+    if (on) {
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="spinner"></span>Connecting';
+    } else {
+      btn.classList.remove('loading');
     }
   }
-   
-  async function init(){await verifyReturn();}
-  window.addEventListener('pageshow',()=>{refresh();});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+
+  // ---------- Render ----------
+  function render() {
+    for (var i = 0; i < TOTAL_STEPS; i++) {
+      var n = i + 1;
+      stepItems[i].className = n < state.step ? 'done' : (n === state.step ? 'active' : 'locked');
+      if (n < state.step) stepItems[i].innerHTML = CHECK_SVG; else if (n === state.step) stepItems[i].textContent = String(n); else { stepItems[i].innerHTML = LOCK_SVG; stepItems[i].setAttribute('aria-label', 'Step ' + n + ' locked'); }
+    }
+    $('stepsFill').style.width = ((state.step - 1) / (TOTAL_STEPS - 1) * 100) + '%';
+    $('stepLabel').innerHTML = 'Step <b>' + state.step + '</b> / ' + TOTAL_STEPS;
+
+    setLoading(false);
+    btn.style.pointerEvents = '';
+    secondBtn.style.pointerEvents = '';
+    if (state.step === TOTAL_STEPS) {
+      btn.innerHTML = '<img class="btn-logo" src="https://i.postimg.cc/nLRZYXbp/Screenshot-2026-11-11-15-18-30-96-f6753c6c6bd60d52382a99e787ed0d57.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">XYZ 2.1 [100% Antiban]</span>';
+      btn.classList.add('final');
+      btn.href = isConfigured(FINAL_DOWNLOAD_LINK) ? FINAL_DOWNLOAD_LINK : '#';
+      secondBtn.innerHTML = '<img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">M1NX VIP [New v2]</span>';
+      secondBtn.hidden = false;
+      secondBtn.href = isConfigured(SECOND_DOWNLOAD_LINK) ? SECOND_DOWNLOAD_LINK : '#';
+    } else {
+      btn.textContent = 'Start';
+      btn.classList.remove('final');
+      var link = linkvertiseLinks[state.step];
+      btn.href = isConfigured(link) ? link : '#';
+      secondBtn.hidden = true;
+      secondBtn.href = '#';
+    }
+
+    // keep the URL in sync so a refresh stays on the same step
+    try { history.replaceState(null, '', '?step=' + state.step); } catch (e) {}
+  }
+
+  // ---------- Click: Linkvertise steps and one-choice final download ----------
+  function handleMainButtonClick(e) {
+    var isFinal = state.step === TOTAL_STEPS;
+    var url = isFinal ? FINAL_DOWNLOAD_LINK : linkvertiseLinks[state.step];
+    if (!isConfigured(url)) {
+      e.preventDefault();
+      toast('লিংক সেট করা হয়নি! কোডের ভেতরে লিংকগুলো চেক করুন।');
+      return;
+    }
+    if (isFinal) {
+      // One completed run allows exactly one panel choice.
+      btn.style.pointerEvents = 'none';
+      secondBtn.style.pointerEvents = 'none';
+      state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+      saveState();
+    } else {
+      state.pendingAt = Date.now(); // saved BEFORE leaving the page
+      state.awayAt = Date.now(); // pause the 5-minute timer while on Linkvertise
+      saveState();
+      setLoading(true);
+    }
+  }
+  btn.addEventListener('click', handleMainButtonClick);
+
+  secondBtn.addEventListener('click', function (e) {
+    if (state.step !== TOTAL_STEPS) {
+      e.preventDefault();
+      toast('দুটি Download option পেতে আগে ৫টি Step complete করুন।');
+      return;
+    }
+    if (!isConfigured(SECOND_DOWNLOAD_LINK)) {
+      e.preventDefault();
+      toast('দ্বিতীয় Download link সেট করা হয়নি।');
+      return;
+    }
+    // Lock both choices and reset progress before opening the selected panel.
+    btn.style.pointerEvents = 'none';
+    secondBtn.style.pointerEvents = 'none';
+    state = { step: 1, pendingAt: 0, savedAt: 0, awayAt: 0 };
+    saveState();
+  });
+
+  // ---------- Return from Linkvertise: ?step=N ----------
+  // The next step unlocks only if the user really clicked START on the current step
+  // and the URL asks for exactly the next step. Typing ?step=5 does nothing.
+  function handleReturn() {
+    var q = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (!q || q !== state.step + 1 || !state.pendingAt) return;
+    if (Date.now() - state.pendingAt >= MIN_AWAY_SECONDS * 1000) {
+      state.step += 1;
+      state.pendingAt = 0;
+      saveState();
+    } else {
+      toast('অনুগ্রহ করে Linkvertise-এর টাস্ক কমপ্লিট করুন।');
+    }
+  }
+
+  function init() {
+    state = loadState();
+    resumeTimerAfterAway();
+    handleReturn();
+    render();
+    // Start the five-minute expiry timer for progress restored from storage too.
+    scheduleExpiry();
+  }
+
+  // back button (bfcache) and other tabs
+  window.addEventListener('pageshow', function (e) { if (e.persisted) init(); });
+  window.addEventListener('storage', function (e) { if (e.key === STORAGE_KEY) init(); });
+
   init();
 })();
 </script>
