@@ -703,10 +703,11 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 
   /* ================= MAIN LOOP ================= */
   let ema = 16.7, lastTierChange = 0;
+  const targetFPS = mobile ? 40 : CFG.fps;
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
-    if (now - last < 1000 / CFG.fps - 2) return;
+    if (now - last < 1000 / targetFPS - 2) return;
     const dt = Math.min(0.05, (now - last) / 1000);
     ema = ema * 0.95 + (now - last) * 0.05;
     last = now; time += dt;
