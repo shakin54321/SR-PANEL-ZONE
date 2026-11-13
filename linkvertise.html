@@ -1267,7 +1267,10 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
     const q=new URLSearchParams(location.search),targetStep=Number(q.get('step')),hash=q.get('hash');
     // The server validates the pending session, step and one-time hash. Keep the
     // callback URL intact on failure so the reason can be diagnosed/retried.
-    if(!hash)return;
+    if(!hash){
+      if(q.has('gate')||q.has('step')) toast('Linkvertise থেকে verification hash ফেরত আসেনি। Target URL ও Anti-Bypass সেটিং আবার পরীক্ষা করতে হবে।');
+      return;
+    }
     if(!Number.isInteger(targetStep)||targetStep<2||targetStep>5){
       toast('Linkvertise return URL-এ step তথ্য পাওয়া যায়নি।');
       return;
