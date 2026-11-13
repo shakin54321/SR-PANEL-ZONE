@@ -661,23 +661,52 @@ function buildScene() {
   const seeds = new Float32Array(N);
   for (let i = 0; i < N; i++) seeds[i] = r();
 
-  // edges (minimum-image neighbours so they stay attached while wrapping)
+  // edges (spatial grid avoids the old all-pairs O(N²) startup freeze)
   const seen = new Set();
   const E = [];
   const MAXD = 12, LONG_MIN = 14, LONG_MAX = 28;
+  const gridN = Math.max(1, Math.floor(L / MAXD));
+  const cellSize = L / gridN;
+  const buckets = Array.from({ length: gridN * gridN * gridN }, () => []);
+  const cell = (v) => Math.min(gridN - 1, Math.floor(wrap(v) / cellSize));
+  for (let j = 0; j < N; j++) {
+    const gx = cell(P[j * 3]), gy = cell(P[j * 3 + 1]), gz = cell(P[j * 3 + 2]);
+    buckets[(gx * gridN + gy) * gridN + gz].push(j);
+  }
   for (let i = 0; i < N; i++) {
-    const cand = [], far = [];
-    for (let j = 0; j < N; j++) {
-      if (j === i) continue;
-      const dx = md(P[i*3], P[j*3]), dy = md(P[i*3+1], P[j*3+1]), dz = md(P[i*3+2], P[j*3+2]);
-      const d = Math.hypot(dx, dy, dz);
-      if (d < MAXD) cand.push([d, j, dx, dy, dz]);
-      else if (d > LONG_MIN && d < LONG_MAX) far.push([d, j, dx, dy, dz]);
+    const cand = [];
+    const cx = cell(P[i * 3]), cy = cell(P[i * 3 + 1]), cz = cell(P[i * 3 + 2]);
+    for (let ox = -1; ox <= 1; ox++) {
+      const gx = (cx + ox + gridN) % gridN;
+      for (let oy = -1; oy <= 1; oy++) {
+        const gy = (cy + oy + gridN) % gridN;
+        for (let oz = -1; oz <= 1; oz++) {
+          const gz = (cz + oz + gridN) % gridN;
+          const bucket = buckets[(gx * gridN + gy) * gridN + gz];
+          for (let q = 0; q < bucket.length; q++) {
+            const j = bucket[q];
+            if (j === i) continue;
+            const dx = md(P[i * 3], P[j * 3]), dy = md(P[i * 3 + 1], P[j * 3 + 1]), dz = md(P[i * 3 + 2], P[j * 3 + 2]);
+            const d = Math.hypot(dx, dy, dz);
+            if (d < MAXD) cand.push([d, j, dx, dy, dz]);
+          }
+        }
+      }
     }
     cand.sort((a, b) => a[0] - b[0]);
     const k = 1 + ((r() * 3) | 0);
     const picks = cand.slice(0, k);
-    if (r() < 0.045 && far.length) picks.push(far[(r() * far.length) | 0]);
+    if (r() < 0.045) {
+      // A bounded random sample preserves occasional long cross-network links
+      // without scanning every node for every node.
+      for (let attempt = 0; attempt < 40; attempt++) {
+        const j = (r() * N) | 0;
+        if (j === i) continue;
+        const dx = md(P[i * 3], P[j * 3]), dy = md(P[i * 3 + 1], P[j * 3 + 1]), dz = md(P[i * 3 + 2], P[j * 3 + 2]);
+        const d = Math.hypot(dx, dy, dz);
+        if (d > LONG_MIN && d < LONG_MAX) { picks.push([d, j, dx, dy, dz]); break; }
+      }
+    }
     for (const [, j, dx, dy, dz] of picks) {
       const key = i < j ? i * N + j : j * N + i;
       if (seen.has(key)) continue;
@@ -918,8 +947,10 @@ function render() {
 /* ───────────────────────────── loop + adaptive quality ───────────────────────────── */
 let last = 0, raf = 0, acc = 0, frames = 0, warm = 0;
 const stats = { fps: 0, quality: 1, edges: 0, nodes: 0, dust: 0, gl2: false };
+const targetFrameMs = coarse ? 1000 / 30 : 1000 / 45;
 function frame(now) {
   raf = requestAnimationFrame(frame);
+  if (now - last < targetFrameMs - 1) return;
   const dtRaw = (now - last) / 1000; last = now;
   const dt = Math.min(Math.max(dtRaw, 0), 0.05);
   updateCamera(dt);
@@ -929,7 +960,7 @@ function frame(now) {
     if (frames >= 60) {
       const avg = acc / frames;
       stats.fps = 1 / avg;
-      if (avg > 0.026 && quality > 0.5) {
+      if (avg > (targetFrameMs / 1000) * 1.25 && quality > 0.5) {
         quality = Math.max(0.5, quality - 0.15);
         if (quality < 0.8) bloomLevels = 2;
         if (quality <= 0.5) bloomLevels = 1;
