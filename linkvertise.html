@@ -1233,7 +1233,11 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
       btn.textContent='Start';btn.classList.remove('final');btn.href='#';
       secondBtn.hidden=true;secondBtn.href='#';
     }
-    try{history.replaceState(null,'',location.pathname+(location.search.includes('gate=lv')?'?gate=lv&step='+step:'?step='+step));}catch(e){}
+    try{
+      const currentQuery=new URLSearchParams(location.search);
+      // Keep Linkvertise's one-time callback hash intact until the server verifies it.
+      if(!currentQuery.has('hash')) history.replaceState(null,'',location.pathname+(currentQuery.get('gate')==='lv'?'?gate=lv&step='+step:'?step='+step));
+    }catch(e){}
   }
   async function refresh(){
     try{
@@ -1260,16 +1264,27 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
     if(step!==TOTAL_STEPS){e.preventDefault();toast('দুটি Download option পেতে আগে ৫টি Step complete করুন।');}
   });
   async function verifyReturn(){
-    const q=new URLSearchParams(location.search),gate=q.get('gate'),targetStep=Number(q.get('step')),hash=q.get('hash');
-    if(gate!=='lv'||!hash)return;
+    const q=new URLSearchParams(location.search),targetStep=Number(q.get('step')),hash=q.get('hash');
+    // The server validates the pending session, step and one-time hash. Keep the
+    // callback URL intact on failure so the reason can be diagnosed/retried.
+    if(!hash)return;
+    if(!Number.isInteger(targetStep)||targetStep<2||targetStep>5){
+      toast('Linkvertise return URL-এ step তথ্য পাওয়া যায়নি।');
+      return;
+    }
     try{
       const r=await fetch('/api/linkvertise/verify',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({step:targetStep,hash})});
       const d=await r.json();
-      if(!r.ok||!d.ok)toast('Linkvertise task verify হয়নি। আবার চেষ্টা করুন।');
-      else toast('Linkvertise task verified!');
-    }catch(e){toast('Verification server-এর সাথে যোগাযোগ করা যায়নি।');}
-    history.replaceState(null,'',location.pathname);
-    await refresh();
+      if(!r.ok||!d.ok){
+        toast('Verification failed: '+(d.error||('HTTP '+r.status)));
+        return;
+      }
+      toast('Linkvertise task verified!');
+      history.replaceState(null,'',location.pathname);
+      await refresh();
+    }catch(e){
+      toast('Verification server-এর সাথে যোগাযোগ করা যায়নি। Callback URL অক্ষত রাখা হয়েছে।');
+    }
   }
    
   async function init(){await verifyReturn();}
