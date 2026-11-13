@@ -333,6 +333,27 @@
 
 /* Performance: pause decorative CSS animations while this tab is hidden. */
 html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animation-play-state:paused!important}
+
+  /* Refined final download choices */
+  #mainBtn.btn.final{
+    color:#fff!important;
+    background:linear-gradient(115deg,#2563eb 0%,#5145d9 52%,#7c3aed 100%)!important;
+    border:1px solid rgba(191,219,254,.55)!important;
+    box-shadow:0 12px 30px rgba(59,91,219,.32),0 0 0 1px rgba(255,255,255,.14) inset!important;
+  }
+  #secondDownloadBtn.btn.final{
+    display:flex;align-items:center;gap:12px;
+    color:#f8fafc!important;
+    background:linear-gradient(115deg,#263449 0%,#334155 55%,#3f4b61 100%)!important;
+    border:1px solid rgba(203,213,225,.25)!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.24),0 0 0 1px rgba(255,255,255,.08) inset!important;
+    cursor:not-allowed;opacity:.92;
+  }
+  #secondDownloadBtn .btn-copy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+  #secondDownloadBtn .btn-label{font-weight:800;letter-spacing:.025em}
+  #secondDownloadBtn .btn-status{font-size:10px;line-height:1.2;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1;opacity:.9}
+  #secondDownloadBtn .lock-icon{width:19px;height:19px;flex:0 0 19px;margin-left:auto;color:#dbeafe;opacity:.95}
+
 </style>
 </head>
 
@@ -1357,9 +1378,11 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
       btn.innerHTML = '<img class="btn-logo" src="https://i.postimg.cc/nLRZYXbp/Screenshot-2026-11-11-15-18-30-96-f6753c6c6bd60d52382a99e787ed0d57.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">XYZ 2.1 [100% Antiban]</span>';
       btn.classList.add('final');
       btn.href = isConfigured(FINAL_DOWNLOAD_LINK) ? FINAL_DOWNLOAD_LINK : '#';
-      secondBtn.innerHTML = '<img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">M1NX VIP [New v2]</span>';
+      secondBtn.innerHTML = '<img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-copy"><span class="btn-label">M1NX VIP [New v2]</span><small class="btn-status">Not working</small></span><svg class="lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="10" width="15" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 14.5v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
       secondBtn.hidden = false;
-      secondBtn.href = isConfigured(SECOND_DOWNLOAD_LINK) ? SECOND_DOWNLOAD_LINK : '#';
+      secondBtn.href = '#';
+      secondBtn.setAttribute('aria-disabled', 'true');
+      secondBtn.style.pointerEvents = 'none';
     } else {
       btn.textContent = 'Start';
       btn.classList.remove('final');
