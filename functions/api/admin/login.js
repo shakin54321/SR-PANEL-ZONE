@@ -44,7 +44,8 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid request" }, 400); }
   const password = typeof body.password === "string" ? body.password : "";
-  if (!password || password.length > 256) return json({ ok: false, error: "Incorrect password" }, 401);
+  const deviceToken = typeof body.deviceToken === "string" ? body.deviceToken : "";
+  if (!password || password.length > 256 || !/^[A-Za-z0-9_-]{40,60}$/.test(deviceToken)) return json({ ok: false, error: "Incorrect password or device" }, 401);
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
   const ipHash = await sha256Hex(ip);
@@ -62,6 +63,15 @@ export async function onRequestPost({ request, env }) {
   if (!valid) {
     await env.VERIFY_DB.prepare("INSERT INTO admin_login_attempts (ip_hash, created_at) VALUES (?, ?)").bind(ipHash, now).run();
     return json({ ok: false, error: "Incorrect password" }, 401);
+  }
+
+  const deviceHash = await sha256Hex(deviceToken);
+  await env.VERIFY_DB.prepare("INSERT OR IGNORE INTO admin_device_lock (id, token_hash, created_at) VALUES (1, ?, ?)")
+    .bind(deviceHash, now).run();
+  const deviceLock = await env.VERIFY_DB.prepare("SELECT token_hash FROM admin_device_lock WHERE id = 1").first();
+  if (!deviceLock || !constantTimeEqual(deviceLock.token_hash, deviceHash)) {
+    await env.VERIFY_DB.prepare("INSERT INTO admin_login_attempts (ip_hash, created_at) VALUES (?, ?)").bind(ipHash, now).run();
+    return json({ ok: false, error: "This admin account is registered to its original browser." }, 403);
   }
 
   await env.VERIFY_DB.prepare("DELETE FROM admin_login_attempts WHERE ip_hash = ?").bind(ipHash).run();
