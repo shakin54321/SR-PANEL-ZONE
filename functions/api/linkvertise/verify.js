@@ -4,9 +4,10 @@ export async function onRequestPost({request,env}){
  const visitor=cookies.find(x=>x.startsWith("lv_visitor="))?.slice(11);
  if(!sid||!visitor)return Response.json({ok:false,error:"Verification session missing. Start the Linkvertise step again."},{status:401});
  if(!env.LINKVERTISE_AUTH_TOKEN)return Response.json({ok:false,error:"Server token is not available in this deployment."},{status:503});
- let body;try{body=await request.json()}catch{return Response.json({ok:false},{status:400})}
+ let body;try{body=await request.json()}catch{return Response.json({ok:false,error:"Invalid verification request body."},{status:400})}
  const step=Number(body.step),hash=String(body.hash||"");
- if(!Number.isInteger(step)||step<2||step>5||!/^[a-f0-9]{64}$/i.test(hash))return Response.json({ok:false},{status:400});
+ if(!Number.isInteger(step)||step<2||step>5)return Response.json({ok:false,error:"Invalid callback step. Restart this Linkvertise step."},{status:400});
+ if(!/^[a-f0-9]{64}$/i.test(hash))return Response.json({ok:false,error:"Linkvertise returned an invalid hash format. Check that Anti-Bypass is enabled and the destination is a Target Link, not a Paste Link."},{status:400});
  const now=Math.floor(Date.now()/1000);
  const s=await env.VERIFY_DB.prepare("SELECT step,expires_at,verified_at,visitor_id FROM sessions WHERE id=? AND provider='lv'").bind(sid).first();
  const p=await env.VERIFY_DB.prepare("SELECT current_step FROM progress WHERE visitor_id=? AND provider='lv'").bind(visitor).first();
