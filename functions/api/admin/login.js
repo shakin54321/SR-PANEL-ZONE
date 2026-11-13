@@ -43,7 +43,7 @@ export async function onRequestPost({ request, env }) {
   if (!sameOrigin(request)) return json({ ok: false, error: "Request rejected" }, 403);
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid request" }, 400); }
-  const password = typeof body.password === "string" ? body.password : "";
+  const password = typeof body.password === "string" ? body.password.normalize("NFKC").trim() : "";
   const deviceToken = typeof body.deviceToken === "string" ? body.deviceToken : "";
   if (!password || password.length > 256 || !/^[A-Za-z0-9_-]{40,60}$/.test(deviceToken)) return json({ ok: false, error: "Incorrect password or device" }, 401);
 
@@ -59,7 +59,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   let valid = false;
-  try { valid = await verifyPassword(password); } catch {}
+  try { valid = await verifyPassword(password); }
+  catch (error) { console.error("Admin password verification failed:", error); return json({ ok: false, error: "Authentication service error" }, 500); }
   if (!valid) {
     await env.VERIFY_DB.prepare("INSERT INTO admin_login_attempts (ip_hash, created_at) VALUES (?, ?)").bind(ipHash, now).run();
     return json({ ok: false, error: "Incorrect password" }, 401);
