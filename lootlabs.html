@@ -35,28 +35,11 @@
     position:relative;overflow-x:hidden;isolation:isolate;
   }
 
-  /* ---------- Background: aurora + grid + scanline ---------- */
-  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-  .bg .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.38;animation:float 16s ease-in-out infinite}
-  .bg .b1{width:420px;height:420px;background:var(--blue);top:-140px;left:-120px}
-  .bg .b2{width:360px;height:360px;background:var(--cyan);top:30%;right:-140px;animation-delay:-5s;opacity:.22}
-  .bg .b3{width:380px;height:380px;background:var(--violet);bottom:-160px;left:20%;animation-delay:-9s;opacity:.25}
-  .bg .grid{
-    position:absolute;inset:0;opacity:.5;
-    background-image:
-      linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(0,229,255,.05) 1px,transparent 1px);
-    background-size:46px 46px;
-    -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
-            mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 75%);
-  }
-  .bg .scan{
-    position:absolute;left:0;right:0;height:140px;top:-140px;
-    background:linear-gradient(180deg,transparent,rgba(0,229,255,.06),transparent);
-    animation:scan 7s linear infinite;
-  }
-  @keyframes float{50%{transform:translate(30px,40px) scale(1.08)}}
-  @keyframes scan{to{transform:translateY(calc(100vh + 280px))}}
+  /* ---------- Ember Network Background ---------- */
+  html{background:#000}
+  body{background:transparent}
+  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,#10051f 0%,#000 70%)}
+  #ember-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,#10051f 0%,#000 70%)}
 
   .wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;animation:rise .7s cubic-bezier(.22,1,.36,1) both}
   @keyframes rise{from{opacity:0;transform:translateY(14px)}}
@@ -348,9 +331,638 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 
 <body>
 <div class="bg" aria-hidden="true">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="grid"></div><div class="scan"></div>
+  <canvas id="ember-bg" aria-hidden="true"></canvas>
 </div>
+<script>
+(() => {
+'use strict';
+
+/* ───────────────────────── SETTINGS (tweak freely) ───────────────────────── */
+const CFG = {
+  nodes: 4300,          // network nodes (connected by lines)
+  dust: 6500,           // tiny floating ember particles
+  clusters: 64,         // dense mesh pockets
+  clusterSpread: 4.4,
+  box: 70,              // size of the repeating world cube
+  radius: 34,           // visible depth radius (fog distance)
+  speed: 5.2,           // forward flight speed
+  lineWidth: 0.034,     // world-space line thickness
+  focus: 13,            // depth-of-field focus distance
+  dofNear: 11,          // blur strength for things closer than focus
+  dofFar: 1.6,          // blur strength for things farther than focus
+  bloom: 1.0,           // glow strength (0 = off)
+  intensity: 1.0,       // overall brightness (lower it if text is hard to read)
+  pointerParallax: 1.0, // camera reacts to mouse / touch (0 = off)
+  drift: 2.2,           // how far nodes float around (0 = frozen network)
+  seed: 20261113
+};
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const canvas = document.getElementById('ember-bg');
+if (!canvas) return;
+
+const coarse = matchMedia('(pointer: coarse)').matches || innerWidth < 760;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const countScale = coarse ? 0.7 : 1;
+
+let gl, isGL2, angle;
+let progLine, progNode, progDown, progBlur, progComp;
+let bufQuadLine, bufQuadNode, bufTri, bufEdge, bufNode, bufDust;
+let edgeCount = 0, nodeCount = 0, dustCount = 0;
+let scene, levels = [];
+let W = 2, H = 2, quality = 1, bloomLevels = 3;
+let alive = false;
+
+/* ───────────────────────────── helpers ───────────────────────────── */
+function rng(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) + '\n' + src);
+  return s;
+}
+function program(vs, fs, attribs) {
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+  attribs.forEach((n, i) => gl.bindAttribLocation(p, i, n));
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u = {};
+  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name] = gl.getUniformLocation(p, info.name); }
+  return { p, u };
+}
+function buf(data) {
+  const b = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, b);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  return b;
+}
+const divisor = (loc, d) => isGL2 ? gl.vertexAttribDivisor(loc, d) : angle.vertexAttribDivisorANGLE(loc, d);
+const drawInst = (n) => isGL2 ? gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n) : angle.drawArraysInstancedANGLE(gl.TRIANGLE_STRIP, 0, 4, n);
+
+function attrib(loc, buffer, size, stride, offset, div) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, size, gl.FLOAT, false, stride, offset);
+  divisor(loc, div);
+}
+
+/* ───────────────────────────── shaders ───────────────────────────── */
+const COMMON = `
+uniform mat3 uM;
+uniform vec3 uCam;
+uniform vec2 uRes;
+uniform float uF, uL, uR, uTime, uDrift;
+vec3 wrapP(vec3 P){ vec3 r = P - uCam; return r - uL * floor(r / uL + 0.5); }
+float fadeOf(vec3 p){ return 1.0 - smoothstep(uR * 0.58, uR, length(p)); }
+vec3 drift(float s){
+  float t = uTime * 0.35;
+  return uDrift * vec3(sin(t * (0.6 + s * 0.7) + s * 31.0),
+                       sin(t * (0.5 + fract(s * 7.3) * 0.8) + s * 57.0),
+                       sin(t * (0.55 + fract(s * 3.7) * 0.7) + s * 13.0));
+}
+`;
+
+const LINE_VS = `precision highp float;
+attribute vec2 aCorner; attribute vec3 aA; attribute vec3 aD; attribute vec4 aS; attribute float aT;
+uniform float uLineW;
+${COMMON}
+varying float vCross, vAlongPx, vLen, vCore, vAlong, vI, vNear, vPhase, vGate, vTipS, vTipD, vTipI, vQ;
+void main(){
+  // both end-nodes float; the line is always glued to them
+  vec3 base = wrapP(aA);
+  vec3 pA = base + drift(aS.w);
+  vec3 pB = base + aD + drift(aT);
+  float tA = fadeOf(pA), tB = fadeOf(pB);
+  float hi = max(tA, tB), lo = min(tA, tB);
+
+  // [u0,u1] = visible part of the edge, measured from node A (0) to node B (1)
+  float u0 = 0.0, u1 = 1.0;
+  // 1) approach: when a new node comes into range, the line GROWS out of the
+  //    already-visible node towards it (instead of fading in from nothing)
+  float ext = smoothstep(0.0, 0.85, lo);
+  if (tA >= tB) u1 = ext; else u0 = 1.0 - ext;
+  // 2) intro: the whole network builds itself during the first seconds
+  u1 = min(u1, smoothstep(0.0, 1.0, (uTime - aS.x * 3.0) / 1.6));
+  // 3) life cycle: node A shoots a line to node B, holds, then the line
+  //    is absorbed back into B (about half of the edges take part)
+  float period = 30.0 + 50.0 * fract(aS.x * 5.17);
+  float ph = fract(uTime / period + fract(aS.x * 17.31));
+  float gate = step(fract(aS.x * 9.13), 0.55);
+  u1 = min(u1, mix(1.0, smoothstep(0.05, 0.12, ph), gate));
+  u0 = max(u0, mix(0.0, smoothstep(0.93, 1.0, ph), gate));
+
+  bool empty = (u1 - u0) < 0.002;
+  vec3 vA = uM * mix(pA, pB, u0);
+  vec3 vB = uM * mix(pA, pB, u1);
+  float dA = -vA.z, dB = -vB.z;
+  float n = 0.4;
+  vec3 a = vA, b = vB;
+  if (dA < n && dB >= n) a = mix(vA, vB, (n - dA) / (dB - dA));
+  if (dB < n && dA >= n) b = mix(vB, vA, (n - dB) / (dA - dB));
+  bool bad = empty || (dA < n && dB < n) || hi <= 0.002;
+  float da = max(-a.z, n), db = max(-b.z, n);
+  float focalPx = uF * uRes.y * 0.5;
+  vec2 sA = a.xy * focalPx / da, sB = b.xy * focalPx / db;
+  vec2 dir = sB - sA;
+  float len = length(dir);
+  dir = len > 0.0001 ? dir / len : vec2(1.0, 0.0);
+  vec2 perp = vec2(-dir.y, dir.x);
+  float wA = uLineW * aS.y * focalPx / da;
+  float wB = uLineW * aS.y * focalPx / db;
+  float x = aCorner.x;
+  float halfW = max(mix(wA, wB, x) * 0.5, 0.42);
+  float tipGrow = smoothstep(0.0, 0.07, 1.0 - u1);
+  float tipEat = 0.5 * smoothstep(0.0, 0.07, u0);
+  float tipS = max(tipGrow, tipEat);
+  float quadHalf = min(halfW * 3.0 + 2.0 + tipS * 3.2 * (3.5 + halfW * 1.2), 160.0);
+  float along = x * (len + 2.0 * quadHalf) - quadHalf;      // px from start of visible part
+  vec2 pos = sA + dir * along + perp * aCorner.y * quadHalf;
+  gl_Position = bad ? vec4(2.0, 2.0, 2.0, 1.0) : vec4(pos / (uRes * 0.5), 0.0, 1.0);
+
+  float dMid = mix(da, db, x);
+  vNear = 1.0 - smoothstep(2.5, 24.0, dMid);
+  float thin = clamp(mix(wA, wB, x) * 0.5 / 0.42, 0.5, 1.0);
+  float flick = 0.86 + 0.14 * sin(uTime * (0.8 + aS.x * 2.0) + aS.x * 50.0);
+  float aFade = smoothstep(0.0, 0.3, hi) * smoothstep(1.2, 4.2, dMid);
+  vI = aFade * aS.z * thin * (0.5 + 0.5 * vNear) * flick;
+  vTipI = aFade * aS.z * (0.4 + 0.6 * vNear);
+
+  // glowing head on the end that is still growing / being absorbed
+  float tipAtEnd = u1 < 0.998 ? 1.0 : 0.0;
+  vTipS = tipS;
+  vTipD = along - tipAtEnd * len;
+
+  vCross = aCorner.y * quadHalf;
+  vQ = quadHalf;
+  vAlongPx = along;
+  vLen = len;
+  vCore = halfW;
+  vAlong = along / max(len, 1.0);
+  vPhase = fract(uTime * (0.12 + 0.22 * aS.x) + aS.x * 7.0);
+  vGate = step(0.55, fract(aS.x * 13.7));
+}`;
+
+const LINE_FS = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying float vCross, vAlongPx, vLen, vCore, vAlong, vI, vNear, vPhase, vGate, vTipS, vTipD, vTipI, vQ;
+void main(){
+  float outside = max(max(-vAlongPx, vAlongPx - vLen), 0.0);   // round caps
+  float d = length(vec2(vCross, outside));
+  float core = 1.0 - smoothstep(vCore - 0.7, vCore + 0.7, d);
+  float s = vCore * 1.8 + 0.6;
+  float halo = exp(-(d * d) / (2.0 * s * s)) * (1.0 - smoothstep(0.45, 1.0, d / vQ));
+  vec3 base = mix(vec3(0.22, 0.08, 0.65), vec3(0.58, 0.32, 1.0), vNear);
+  vec3 col = base * core + vec3(0.34, 0.12, 0.85) * halo * 0.42;
+  float c2 = 1.0 - smoothstep(0.0, max(vCore * 0.55, 0.35), d);
+  col += vec3(0.82, 0.68, 1.0) * c2 * vNear * 0.5;
+  float x = (vAlong - vPhase) * 7.0;
+  float pulse = exp(-x * x) * vGate;
+  col *= 1.0 + pulse * 1.7;
+  vec3 outc = col * vI;
+  float sg = 3.5 + vCore * 1.2;
+  float spark = exp(-(vTipD * vTipD + vCross * vCross) / (2.0 * sg * sg)) * (1.0 - smoothstep(0.5, 1.0, length(vec2(vTipD, vCross)) / vQ));
+  outc += vec3(0.88, 0.78, 1.0) * spark * vTipS * vTipI * 1.4;
+  gl_FragColor = vec4(outc, 1.0);
+}`;
+
+const NODE_VS = `precision highp float;
+attribute vec2 aCorner; attribute vec3 aP; attribute vec4 aS;
+uniform float uFocus, uDofNear, uDofFar;
+${COMMON}
+varying vec2 vUV;
+varying float vR, vQ, vSoft, vI, vHot, vNear;
+void main(){
+  vec3 p = wrapP(aP) + drift(aS.x);
+  float fade = fadeOf(p);
+  vec3 v = uM * p;
+  float d = -v.z;
+  vUV = vec2(0.0); vR = 1.0; vQ = 1.0; vSoft = 0.0; vI = 0.0; vHot = 0.0; vNear = 0.0;
+  if (d < 0.5 || fade < 0.002) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  float focalPx = uF * uRes.y * 0.5;
+  float scl = uRes.y / 1280.0;
+  float hot = aS.w;
+  float r0 = aS.y * focalPx / d;
+  float coc = d < uFocus ? uDofNear * (uFocus - d) / d : uDofFar * (d - uFocus) / d;
+  coc = min(coc * scl, 46.0 * scl);
+  float fl = hot > 0.5 ? pow(max(0.0, sin(uTime * (0.3 + aS.x * 0.55) + aS.x * 60.0)), 12.0) : 0.0;
+  float bud = mix(0.4, 1.0, smoothstep(0.0, 0.5, fade));
+  float r = (max(r0, 0.7) + coc * 0.6) * (1.0 + 0.45 * fl) * bud;
+  float Q = r * (hot > 0.5 ? 3.6 : 2.4) + 2.0;
+  vec2 s = v.xy * focalPx / d + aCorner * Q;
+  gl_Position = vec4(s / (uRes * 0.5), 0.0, 1.0);
+  vSoft = clamp(coc / (r0 + coc + 1.0), 0.0, 1.0);
+  float area = clamp(r0 / 0.9, 0.3, 1.0);
+  float tw = 0.8 + 0.2 * sin(uTime * (1.0 + aS.x * 3.0) + aS.x * 80.0);
+  vI = fade * aS.z * area * tw * (1.0 + 1.2 * fl) * mix(1.0, 0.58, vSoft) * smoothstep(0.5, 1.5, d);
+  vNear = 1.0 - smoothstep(3.0, 26.0, d);
+  vUV = aCorner * Q; vR = r; vQ = Q; vHot = hot;
+}`;
+
+const NODE_FS = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 vUV;
+varying float vR, vQ, vSoft, vI, vHot, vNear;
+void main(){
+  float dist = length(vUV);
+  float q = dist / vR;
+  float soft = 0.12 + 0.6 * vSoft;
+  float disc = 1.0 - smoothstep(1.0 - soft, 1.1 + soft * 0.25, q);
+  float inner = 1.0 - smoothstep(0.0, 0.85, q);
+  vec3 cOuter = mix(vec3(0.28, 0.10, 0.72), vec3(0.68, 0.42, 1.0), vNear);
+  vec3 cCore = vec3(0.91, 0.84, 1.0);
+  vec3 col = disc * mix(cOuter, cCore, inner * (0.35 + 0.65 * vHot));
+  float haloK = mix(0.35, 0.85, vHot);
+  float halo = exp(-q * q * 0.45) * haloK * (1.0 - smoothstep(0.55, 1.0, dist / vQ));
+  col += vec3(0.38, 0.14, 0.92) * halo * (0.55 + 0.45 * vHot);
+  gl_FragColor = vec4(col * vI, 1.0);
+}`;
+
+const TRI_VS = `precision highp float;
+attribute vec2 aPos; varying vec2 vUv;
+void main(){ vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`;
+
+const DOWN_FS = `precision mediump float;
+varying vec2 vUv; uniform sampler2D uTex; uniform vec2 uTexel; uniform float uThresh;
+void main(){
+  vec3 c = texture2D(uTex, vUv + uTexel * vec2(-0.5, -0.5)).rgb
+         + texture2D(uTex, vUv + uTexel * vec2( 0.5, -0.5)).rgb
+         + texture2D(uTex, vUv + uTexel * vec2(-0.5,  0.5)).rgb
+         + texture2D(uTex, vUv + uTexel * vec2( 0.5,  0.5)).rgb;
+  c *= 0.25;
+  c = max(c - uThresh, 0.0) * (1.0 + uThresh);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+
+const BLUR_FS = `precision mediump float;
+varying vec2 vUv; uniform sampler2D uTex; uniform vec2 uDir;
+void main(){
+  vec3 c = texture2D(uTex, vUv).rgb * 0.2270270270;
+  c += texture2D(uTex, vUv + uDir * 1.3846153846).rgb * 0.3162162162;
+  c += texture2D(uTex, vUv - uDir * 1.3846153846).rgb * 0.3162162162;
+  c += texture2D(uTex, vUv + uDir * 3.2307692308).rgb * 0.0702702703;
+  c += texture2D(uTex, vUv - uDir * 3.2307692308).rgb * 0.0702702703;
+  gl_FragColor = vec4(c, 1.0);
+}`;
+
+const COMP_FS = `precision highp float;
+varying vec2 vUv;
+uniform sampler2D uScene, uB0, uB1, uB2;
+uniform vec3 uBW; uniform float uGain, uSeed;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main(){
+  vec3 c = texture2D(uScene, vUv).rgb;
+  c += texture2D(uB0, vUv).rgb * uBW.x;
+  c += texture2D(uB1, vUv).rgb * uBW.y;
+  c += texture2D(uB2, vUv).rgb * uBW.z;
+  c *= uGain;
+  vec2 q = vUv - 0.5;
+  c *= 1.0 - 0.6 * dot(q, q);
+  c += (hash(gl_FragCoord.xy + uSeed) - 0.5) * (2.0 / 255.0);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+
+/* ───────────────────────────── scene data ───────────────────────────── */
+function buildScene() {
+  const r = rng(CFG.seed);
+  const L = CFG.box;
+  const N = Math.round(CFG.nodes * countScale);
+  const gauss = () => Math.sqrt(-2 * Math.log(r() + 1e-9)) * Math.cos(2 * Math.PI * r());
+  const wrap = (v) => ((v % L) + L) % L;
+  const P = new Float32Array(N * 3);
+  const centers = [];
+  for (let i = 0; i < CFG.clusters; i++) centers.push([r() * L, r() * L, r() * L]);
+  for (let i = 0; i < N; i++) {
+    if (r() < 0.62) {
+      const c = centers[(r() * centers.length) | 0];
+      for (let k = 0; k < 3; k++) P[i * 3 + k] = wrap(c[k] + gauss() * CFG.clusterSpread);
+    } else {
+      for (let k = 0; k < 3; k++) P[i * 3 + k] = r() * L;
+    }
+  }
+  const md = (a, b) => { let d = b - a; return d - L * Math.round(d / L); };
+  const seeds = new Float32Array(N);
+  for (let i = 0; i < N; i++) seeds[i] = r();
+
+  // edges (minimum-image neighbours so they stay attached while wrapping)
+  const seen = new Set();
+  const E = [];
+  const MAXD = 12, LONG_MIN = 14, LONG_MAX = 28;
+  for (let i = 0; i < N; i++) {
+    const cand = [], far = [];
+    for (let j = 0; j < N; j++) {
+      if (j === i) continue;
+      const dx = md(P[i*3], P[j*3]), dy = md(P[i*3+1], P[j*3+1]), dz = md(P[i*3+2], P[j*3+2]);
+      const d = Math.hypot(dx, dy, dz);
+      if (d < MAXD) cand.push([d, j, dx, dy, dz]);
+      else if (d > LONG_MIN && d < LONG_MAX) far.push([d, j, dx, dy, dz]);
+    }
+    cand.sort((a, b) => a[0] - b[0]);
+    const k = 1 + ((r() * 3) | 0);
+    const picks = cand.slice(0, k);
+    if (r() < 0.045 && far.length) picks.push(far[(r() * far.length) | 0]);
+    for (const [, j, dx, dy, dz] of picks) {
+      const key = i < j ? i * N + j : j * N + i;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      E.push([i, j, dx, dy, dz]);
+    }
+  }
+  edgeCount = E.length;
+  const eData = new Float32Array(edgeCount * 11);
+  E.forEach(([i, j, dx, dy, dz], e) => {
+    const o = e * 11, q = r();
+    eData[o] = P[i*3]; eData[o+1] = P[i*3+1]; eData[o+2] = P[i*3+2];
+    eData[o+3] = dx; eData[o+4] = dy; eData[o+5] = dz;
+    eData[o+6] = r();                         // seed
+    eData[o+7] = 0.55 + q * q * 1.5;          // width scale
+    eData[o+8] = 0.4 + 0.6 * r();             // brightness
+    eData[o+9] = seeds[i];                    // seed of node A (so the line follows it)
+    eData[o+10] = seeds[j];                   // seed of node B
+  });
+
+  // graph nodes
+  nodeCount = N;
+  const nData = new Float32Array(N * 7);
+  for (let i = 0; i < N; i++) {
+    const o = i * 7, hot = r() < 0.09;
+    nData[o] = P[i*3]; nData[o+1] = P[i*3+1]; nData[o+2] = P[i*3+2];
+    nData[o+3] = seeds[i];
+    nData[o+4] = hot ? 0.10 + r() * 0.20 : 0.03 + r() * 0.05;
+    nData[o+5] = hot ? 0.9 + r() * 0.4 : 0.5 + r() * 0.5;
+    nData[o+6] = hot ? 1 : 0;
+  }
+
+  // dust
+  dustCount = Math.round(CFG.dust * countScale);
+  const dData = new Float32Array(dustCount * 7);
+  for (let i = 0; i < dustCount; i++) {
+    const o = i * 7, q = r();
+    dData[o] = r() * L; dData[o+1] = r() * L; dData[o+2] = r() * L;
+    dData[o+3] = r();
+    dData[o+4] = 0.02 + q * q * 0.07;
+    dData[o+5] = 0.4 + r() * 0.7;
+    dData[o+6] = 0;
+  }
+  bufEdge = buf(eData); bufNode = buf(nData); bufDust = buf(dData);
+}
+
+/* ───────────────────────────── GL init ───────────────────────────── */
+function makeTarget(w, h) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  return { tex, fbo, w, h };
+}
+function freeTarget(t) { if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fbo); } }
+
+function makeTargets() {
+  freeTarget(scene);
+  levels.forEach(l => { freeTarget(l.a); freeTarget(l.b); });
+  scene = makeTarget(W, H);
+  levels = [4, 8, 16].map(div => {
+    const w = Math.max(2, Math.round(W / div)), h = Math.max(2, Math.round(H / div));
+    return { a: makeTarget(w, h), b: makeTarget(w, h) };
+  });
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+function resize() {
+  const cw = canvas.clientWidth || innerWidth, ch = canvas.clientHeight || innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
+  let w = cw * dpr * quality, h = ch * dpr * quality;
+  const maxPix = 2.4e6;
+  if (w * h > maxPix) { const k = Math.sqrt(maxPix / (w * h)); w *= k; h *= k; }
+  W = Math.max(2, Math.round(w)); H = Math.max(2, Math.round(h));
+  canvas.width = W; canvas.height = H;
+  if (gl) makeTargets();
+}
+
+function init() {
+  const opts = { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: 'high-performance', preserveDrawingBuffer: false };
+  gl = canvas.getContext('webgl2', opts);
+  isGL2 = !!gl;
+  if (!gl) gl = canvas.getContext('webgl', opts) || canvas.getContext('experimental-webgl', opts);
+  if (!gl) return false;
+  if (!isGL2) { angle = gl.getExtension('ANGLE_instanced_arrays'); if (!angle) return false; }
+
+  progLine = program(LINE_VS, LINE_FS, ['aCorner', 'aA', 'aD', 'aS', 'aT']);
+  progNode = program(NODE_VS, NODE_FS, ['aCorner', 'aP', 'aS']);
+  progDown = program(TRI_VS, DOWN_FS, ['aPos']);
+  progBlur = program(TRI_VS, BLUR_FS, ['aPos']);
+  progComp = program(TRI_VS, COMP_FS, ['aPos']);
+
+  bufQuadLine = buf(new Float32Array([0, -1, 0, 1, 1, -1, 1, 1]));
+  bufQuadNode = buf(new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  bufTri = buf(new Float32Array([-1, -1, 3, -1, -1, 3]));
+  buildScene();
+  resize();
+  gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+  return true;
+}
+
+/* ───────────────────────────── camera ───────────────────────────── */
+const cam = { x: 10, y: 10, z: 10, t: 0, px: 0, py: 0, tpx: 0, tpy: 0 };
+const M = new Float32Array(9);
+function mul(a, b) {
+  const o = new Array(9);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++)
+    o[i*3+j] = a[i*3]*b[j] + a[i*3+1]*b[3+j] + a[i*3+2]*b[6+j];
+  return o;
+}
+function updateCamera(dt) {
+  const k = reduceMotion ? 0.2 : 1;
+  cam.t += dt * k;
+  const t = cam.t, L = CFG.box;
+  const spd = CFG.speed * (1 + 0.32 * Math.sin(t * 0.37) + 0.12 * Math.sin(t * 0.91));
+  cam.z -= spd * dt * k;
+  cam.x += (1.3 * Math.sin(t * 0.17) + 0.6 * Math.sin(t * 0.43)) * dt * k;
+  cam.y += (0.9 + 0.7 * Math.sin(t * 0.11)) * dt * k;
+  cam.x = ((cam.x % L) + L) % L; cam.y = ((cam.y % L) + L) % L; cam.z = ((cam.z % L) + L) % L;
+  const f = 1 - Math.exp(-dt * 3);
+  cam.px += (cam.tpx - cam.px) * f; cam.py += (cam.tpy - cam.py) * f;
+  const pp = CFG.pointerParallax;
+  const yaw = 0.14 * Math.sin(t * 0.13) + 0.5 * cam.px * pp * 0.35;
+  const pitch = 0.09 * Math.sin(t * 0.09 + 1.0) + 0.5 * cam.py * pp * 0.25;
+  const roll = 0.14 * Math.sin(t * 0.05 + 2.0) + 0.05 * Math.sin(t * 0.21);
+  const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
+  const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
+  const cr = Math.cos(-roll), sr = Math.sin(-roll);
+  const Ry = [cy, 0, sy, 0, 1, 0, -sy, 0, cy];
+  const Rx = [1, 0, 0, 0, cp, -sp, 0, sp, cp];
+  const Rz = [cr, -sr, 0, sr, cr, 0, 0, 0, 1];
+  const R = mul(Rz, mul(Rx, Ry));
+  // row-major → column-major
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) M[j*3+i] = R[i*3+j];
+}
+
+/* ───────────────────────────── render ───────────────────────────── */
+function setCommon(P) {
+  gl.uniformMatrix3fv(P.u.uM, false, M);
+  gl.uniform3f(P.u.uCam, cam.x, cam.y, cam.z);
+  gl.uniform2f(P.u.uRes, W, H);
+  gl.uniform1f(P.u.uF, 1 / Math.tan(30 * Math.PI / 180));
+  gl.uniform1f(P.u.uL, CFG.box);
+  gl.uniform1f(P.u.uR, CFG.radius);
+  gl.uniform1f(P.u.uTime, cam.t);
+  gl.uniform1f(P.u.uDrift, CFG.drift);
+}
+function bindTarget(t) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, t ? t.fbo : null);
+  gl.viewport(0, 0, t ? t.w : W, t ? t.h : H);
+}
+function tri(P) {
+  gl.useProgram(P.p);
+  for (let i = 1; i < 5; i++) gl.disableVertexAttribArray(i);
+  attrib(0, bufTri, 2, 0, 0, 0);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+function tex(unit, t) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t.tex); }
+
+function drawNodes(b, n) {
+  attrib(0, bufQuadNode, 2, 0, 0, 0);
+  attrib(1, b, 3, 28, 0, 1);
+  attrib(2, b, 4, 28, 12, 1);
+  gl.disableVertexAttribArray(3);
+  gl.disableVertexAttribArray(4);
+  drawInst(n);
+}
+
+function render() {
+  // 1) scene
+  bindTarget(scene);
+  gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+
+  gl.useProgram(progNode.p); setCommon(progNode);
+  gl.uniform1f(progNode.u.uFocus, CFG.focus);
+  gl.uniform1f(progNode.u.uDofNear, CFG.dofNear);
+  gl.uniform1f(progNode.u.uDofFar, CFG.dofFar);
+  gl.uniform1f(progNode.u.uDrift, CFG.drift * 0.45);
+  drawNodes(bufDust, dustCount);
+
+  gl.useProgram(progLine.p); setCommon(progLine);
+  gl.uniform1f(progLine.u.uLineW, CFG.lineWidth);
+  attrib(0, bufQuadLine, 2, 0, 0, 0);
+  attrib(1, bufEdge, 3, 44, 0, 1);
+  attrib(2, bufEdge, 3, 44, 12, 1);
+  attrib(3, bufEdge, 4, 44, 24, 1);
+  attrib(4, bufEdge, 1, 44, 40, 1);
+  drawInst(edgeCount);
+
+  gl.useProgram(progNode.p);
+  gl.uniform1f(progNode.u.uDrift, CFG.drift);
+  drawNodes(bufNode, nodeCount);
+  gl.disable(gl.BLEND);
+  // reset divisors so fullscreen passes aren't instanced
+  for (let i = 0; i < 5; i++) divisor(i, 0);
+
+  // 2) bloom
+  const doBloom = CFG.bloom > 0 && bloomLevels > 0;
+  if (doBloom) {
+    let src = scene;
+    for (let i = 0; i < bloomLevels; i++) {
+      const L = levels[i];
+      bindTarget(L.a); gl.useProgram(progDown.p);
+      tex(0, src); gl.uniform1i(progDown.u.uTex, 0);
+      gl.uniform2f(progDown.u.uTexel, 1 / src.w, 1 / src.h);
+      gl.uniform1f(progDown.u.uThresh, i === 0 ? 0.18 : 0.0);
+      tri(progDown);
+      bindTarget(L.b); gl.useProgram(progBlur.p);
+      tex(0, L.a); gl.uniform1i(progBlur.u.uTex, 0);
+      gl.uniform2f(progBlur.u.uDir, 1 / L.a.w, 0); tri(progBlur);
+      bindTarget(L.a);
+      tex(0, L.b); gl.uniform2f(progBlur.u.uDir, 0, 1 / L.b.h); tri(progBlur);
+      src = L.a;
+    }
+  }
+
+  // 3) composite
+  bindTarget(null);
+  gl.useProgram(progComp.p);
+  tex(0, scene); gl.uniform1i(progComp.u.uScene, 0);
+  tex(1, levels[0].a); gl.uniform1i(progComp.u.uB0, 1);
+  tex(2, levels[1].a); gl.uniform1i(progComp.u.uB1, 2);
+  tex(3, levels[2].a); gl.uniform1i(progComp.u.uB2, 3);
+  const bw = doBloom ? CFG.bloom : 0;
+  gl.uniform3f(progComp.u.uBW, bloomLevels > 0 ? 0.55 * bw : 0, bloomLevels > 1 ? 0.7 * bw : 0, bloomLevels > 2 ? 0.8 * bw : 0);
+  gl.uniform1f(progComp.u.uGain, CFG.intensity);
+  gl.uniform1f(progComp.u.uSeed, (cam.t * 60) % 1000);
+  tri(progComp);
+}
+
+/* ───────────────────────────── loop + adaptive quality ───────────────────────────── */
+let last = 0, raf = 0, acc = 0, frames = 0, warm = 0;
+const stats = { fps: 0, quality: 1, edges: 0, nodes: 0, dust: 0, gl2: false };
+function frame(now) {
+  raf = requestAnimationFrame(frame);
+  const dtRaw = (now - last) / 1000; last = now;
+  const dt = Math.min(Math.max(dtRaw, 0), 0.05);
+  updateCamera(dt);
+  render();
+  if (++warm > 40) {
+    acc += dtRaw; frames++;
+    if (frames >= 60) {
+      const avg = acc / frames;
+      stats.fps = 1 / avg;
+      if (avg > 0.026 && quality > 0.5) {
+        quality = Math.max(0.5, quality - 0.15);
+        if (quality < 0.8) bloomLevels = 2;
+        if (quality <= 0.5) bloomLevels = 1;
+        resize(); stats.quality = quality;
+      }
+      acc = 0; frames = 0;
+    }
+  }
+}
+function start() { if (!raf && alive) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+function stop() { cancelAnimationFrame(raf); raf = 0; }
+
+/* ───────────────────────────── boot ───────────────────────────── */
+function boot() {
+  try { alive = init(); } catch (e) { console.error('[EmberBG]', e); alive = false; }
+  if (!alive) { canvas.style.background = 'radial-gradient(ellipse at 50% 40%, #18072e 0%, #000 70%)'; return; }
+  stats.gl2 = isGL2; stats.edges = edgeCount; stats.nodes = nodeCount; stats.dust = dustCount;
+  start();
+}
+canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stop(); alive = false; });
+canvas.addEventListener('webglcontextrestored', () => { boot(); });
+new ResizeObserver(() => { if (alive) resize(); }).observe(canvas);
+addEventListener('pointermove', (e) => {
+  cam.tpx = e.clientX / innerWidth - 0.5;
+  cam.tpy = e.clientY / innerHeight - 0.5;
+}, { passive: true });
+document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
+
+boot();
+window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
+  step(sec) { for (let t = 0; t < sec; t += 0.02) updateCamera(0.02); if (alive) render(); } };
+})();
+</script>
 
 <div class="wrap">
 
