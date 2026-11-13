@@ -364,16 +364,6 @@
 /* Performance: pause decorative CSS animations while this tab is hidden. */
 html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animation-play-state:paused!important}
 </style>
-<script>
-(function(){
-  try{
-    var q=new URLSearchParams(location.search);
-    if(q.get('gate')==='lv' && q.get('hash')){
-      location.replace('/linkvertise?'+q.toString());
-    }
-  }catch(e){}
-})();
-</script>
 </head>
 
 <body>
@@ -1058,7 +1048,17 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 (function () {
   try {
     var params = new URLSearchParams(location.search);
-    if (params.get('gate') === 'lv') return; // Linkvertise progress is verified server-side via the one-time hash.
+    if (params.get('gate') === 'lv') {
+      var lv = JSON.parse(localStorage.getItem('linkvertise_progress_v1') || 'null');
+      var q = parseInt(params.get('step'), 10);
+      if (lv && Number.isInteger(lv.step) && lv.step >= 1 && lv.step <= 4 &&
+          typeof lv.pendingAt === 'number' && typeof lv.awayAt === 'number' &&
+          lv.pendingAt && lv.awayAt && q === lv.step + 1 &&
+          Date.now() - lv.pendingAt >= 10000 && lv.awayAt <= Date.now()) {
+        location.replace('/linkvertise?step=' + q);
+      }
+      return;
+    }
     var state = JSON.parse(localStorage.getItem('safelink_progress_v3') || 'null');
     if (!state || !Number.isInteger(state.step) || state.step < 1 || state.step > 4 ||
         typeof state.pendingAt !== 'number' || typeof state.awayAt !== 'number' ||
