@@ -1059,11 +1059,13 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
       }
       return;
     }
-    // LootLabs: only accept a return navigation coming from the LootLabs domain.
-    // This prevents reopening the homepage after closing the browser from advancing a step.
-    var lootlabsReferrerHost = '';
-    try { lootlabsReferrerHost = new URL(document.referrer).hostname.toLowerCase(); } catch (e) {}
-    if (lootlabsReferrerHost !== 'loot-link.com' && !lootlabsReferrerHost.endsWith('.loot-link.com')) return;
+    // LootLabs return: require an external referrer. LootLabs may redirect
+    // through different hostnames, so do not hard-code loot-link.com.
+    var returnReferrer = '';
+    try { returnReferrer = new URL(document.referrer).hostname.toLowerCase(); } catch (e) {}
+    var ownHost = location.hostname.toLowerCase();
+    if (!returnReferrer || returnReferrer === ownHost ||
+        returnReferrer.endsWith('.' + ownHost)) return;
 
     var state = JSON.parse(localStorage.getItem('safelink_progress_v3') || 'null');
     if (!state || !Number.isInteger(state.step) || state.step < 1 || state.step > 4 ||
