@@ -364,6 +364,13 @@
 /* Performance: pause decorative CSS animations while this tab is hidden. */
 html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animation-play-state:paused!important}
 </style>
+
+<style id="sr-admin-float-style">
+#srAdminFloat{position:fixed;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:100000;display:none;align-items:center;gap:8px;padding:11px 15px;border:1px solid rgba(132,163,255,.42);border-radius:999px;background:linear-gradient(115deg,rgba(34,105,235,.96),rgba(113,74,220,.96));color:#fff;text-decoration:none;font:800 11px/1 system-ui,sans-serif;letter-spacing:.08em;box-shadow:0 10px 32px rgba(38,91,210,.36),inset 0 1px rgba(255,255,255,.2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#srAdminFloat svg{width:15px;height:15px;flex:none}
+#srAdminFloat:active{transform:scale(.97)}
+@media(max-width:480px){#srAdminFloat{top:calc(10px + env(safe-area-inset-top));right:10px;padding:10px 12px;font-size:10px}}
+</style>
 </head>
 
 <body>
@@ -1083,6 +1090,21 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 <script>
 /* Performance: suspend CSS animation work while the page is in the background. */
 (function(){var root=document.documentElement;function syncVisibility(){root.classList.toggle("page-hidden",document.hidden);}document.addEventListener("visibilitychange",syncVisibility,{passive:true});syncVisibility();})();
+</script>
+
+<script id="sr-admin-float">
+(function(){
+  fetch('/api/admin/session',{credentials:'same-origin',cache:'no-store'})
+    .then(function(response){if(!response.ok)return null;return response.json();})
+    .then(function(data){
+      if(!data||!data.ok||document.getElementById('srAdminFloat'))return;
+      var link=document.createElement('a');
+      link.id='srAdminFloat';link.href='/sr-control/panel/';link.style.display='inline-flex';
+      link.setAttribute('aria-label','Open private admin panel');
+      link.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>ADMIN PANEL</span>';
+      document.body.appendChild(link);
+    }).catch(function(){});
+})();
 </script>
 </body>
 </html>
