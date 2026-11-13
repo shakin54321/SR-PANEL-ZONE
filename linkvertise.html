@@ -282,6 +282,10 @@
     transition:all .3s ease;z-index:50;
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
+  .verification-status{display:none;width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(0,229,255,.35);color:var(--text);font-size:.82rem;line-height:1.5;text-align:center;overflow-wrap:anywhere}
+  .verification-status.show{display:block}
+  .verification-status.error{border-color:rgba(255,100,100,.65);color:#ffdada}
+  .verification-status.success{border-color:rgba(0,255,157,.55);color:#baffdf}
 
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation:none !important;transition:none !important}
@@ -1039,6 +1043,7 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
 
   <section class="card action">
     <div class="step-label" id="stepLabel">Step <b>1</b> / 5</div>
+    <div class="verification-status" id="verificationStatus" role="status" aria-live="polite"></div>
     <a class="btn" id="mainBtn" href="#" rel="noopener noreferrer">Start</a>
     <a class="btn final" id="secondDownloadBtn" href="#" rel="noopener noreferrer" hidden><img class="btn-logo" src="https://i.postimg.cc/L4CM3z2b/Screenshot-2026-11-12-10-07-43-59-b783bf344239542886fee7b48fa4b892.jpg" alt="" loading="lazy" decoding="async"><span class="btn-label">M1NX VIP [New v2]</span></a>
   </section>
@@ -1212,7 +1217,11 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
   let toastTimer;
   function toast(msg){
     const t=$('toast');t.textContent=msg;t.classList.add('show');
-    clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+    clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),9000);
+  }
+  function verificationStatus(msg,type){
+    const el=$('verificationStatus');if(!el)return;
+    el.textContent=msg;el.className='verification-status show '+(type||'');
   }
   function render(){
     for(let i=0;i<TOTAL_STEPS;i++){
@@ -1279,14 +1288,14 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
       const r=await fetch('/api/linkvertise/verify',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({step:targetStep,hash})});
       const d=await r.json();
       if(!r.ok||!d.ok){
-        toast('Verification failed: '+(d.error||('HTTP '+r.status)));
+        const msg='Verification failed: '+(d.error||('HTTP '+r.status));verificationStatus(msg+' (HTTP '+r.status+')','error');toast(msg);
         return;
       }
-      toast('Linkvertise task verified!');
+      verificationStatus('Linkvertise task verified! Step '+targetStep+' unlocked.','success');toast('Linkvertise task verified!');
       history.replaceState(null,'',location.pathname);
       await refresh();
     }catch(e){
-      toast('Verification server-এর সাথে যোগাযোগ করা যায়নি। Callback URL অক্ষত রাখা হয়েছে।');
+      const msg='Verification server-এর সাথে যোগাযোগ করা যায়নি। Callback URL অক্ষত রাখা হয়েছে।';verificationStatus(msg,'error');toast(msg);
     }
   }
    
