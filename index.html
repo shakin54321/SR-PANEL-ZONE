@@ -1104,19 +1104,23 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
   audio.volume=0.65;
   var manuallyPaused=false;
   function update(){button.textContent=audio.paused?'♫ Tap for sound':'♫ Sound on';button.setAttribute('aria-pressed',String(!audio.paused));}
-  function attempt(){if(manuallyPaused)return;var p=audio.play();if(p&&p.then){p.then(update).catch(update);}else update();}
+  function attempt(){
+    if(manuallyPaused||!audio.paused)return;
+    var p=audio.play();
+    if(p&&p.then){p.then(update).catch(update);}else update();
+  }
   button.addEventListener('click',function(){
     if(audio.paused){manuallyPaused=false;attempt();}
     else{manuallyPaused=true;audio.pause();update();}
   });
   audio.addEventListener('play',update);
   audio.addEventListener('pause',update);
+  // Retry on real user activity across touch, pointer, scroll, drag and keyboard.
+  // Calling play() directly in the interaction handler preserves user activation.
+  ['pointerdown','pointerup','pointermove','touchstart','touchmove','wheel','scroll','click','keydown','dragstart'].forEach(function(type){
+    document.addEventListener(type,attempt,{capture:true,passive:true});
+  });
   attempt();
-  if(audio.paused){
-    var resumeOnce=function(){if(!manuallyPaused)attempt();};
-    document.addEventListener('pointerdown',resumeOnce,{once:true,capture:true});
-    document.addEventListener('keydown',resumeOnce,{once:true,capture:true});
-  }
   update();
 })();
 </script>
