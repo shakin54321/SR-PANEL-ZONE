@@ -365,6 +365,14 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 /* Site-wide background music control */
 .home-audio-toggle{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));z-index:1100;min-height:40px;padding:9px 13px;border:1px solid rgba(120,190,255,.28);border-radius:999px;background:rgba(12,20,34,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#e8f2ff;font:700 .78rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.03em;box-shadow:0 5px 18px rgba(0,0,0,.25);cursor:pointer}
 .home-audio-toggle:focus-visible{outline:2px solid #00e5ff;outline-offset:3px}
+
+  /* Support launcher: fixed position and no movement */
+  #supportLauncherWrap{position:fixed!important;right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;cursor:default!important;touch-action:manipulation!important;transition:none!important;transform:none!important;}
+  #supportLauncherWrap::before{animation:none!important;}
+  #supportLauncherWrap.support-ready{animation:none!important;opacity:1!important;}
+  #supportLauncherWrap .support-speech{font-size:8px!important;line-height:1.2!important;padding:5px 7px!important;max-width:min(160px,58vw)!important;animation:none!important;}
+  #supportLauncherWrap .support-btn,#supportLauncherWrap .support-btn:hover,#supportLauncherWrap .support-btn:active{animation:none!important;transform:none!important;transition:none!important;}
+  #supportLauncherWrap .support-btn img{animation:none!important;transform:none!important;}
 </style>
 </head>
 
@@ -1131,77 +1139,19 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
     popup.hidden=!open;
     launcher.setAttribute('aria-expanded',String(open));
     if(open){launcherWrap.classList.add('support-suspended');clearTimeout(moveTimer);clearTimeout(speechTimer);}
-    else{launcherWrap.classList.remove('support-suspended');scheduleSpeech();clearTimeout(moveTimer);moveTimer=window.setTimeout(wander,1400+Math.random()*900);}
+    else{launcherWrap.classList.remove('support-suspended');scheduleSpeech();}
   }
   var dragState=null;
   var suppressLauncherClick=false;
   var speech=document.getElementById('supportSpeech');
   var helperMessages=['ডাউনলোডে সমস্যা? সহায়তার জন্য ক্লিক করুন।'];
-  var messageIndex=0,moveTimer=null,speechTimer=null;
+  var messageIndex=0,speechTimer=null;
   function nextMessage(){
     if(!speech)return;
-    var next=messageIndex;while(next===messageIndex&&helperMessages.length>1)next=Math.floor(Math.random()*helperMessages.length);
-    messageIndex=next;speech.textContent=helperMessages[messageIndex];
+    messageIndex=0;speech.textContent=helperMessages[0];
   }
-  function scheduleSpeech(){clearTimeout(speechTimer);speechTimer=window.setTimeout(function(){if(popup.hidden&&!dragState)nextMessage();scheduleSpeech();},6500+Math.random()*5500);}
+  function scheduleSpeech(){clearTimeout(speechTimer);speechTimer=window.setTimeout(function(){if(popup.hidden)nextMessage();scheduleSpeech();},6500+Math.random()*5500);}
   scheduleSpeech();
-  function findSafePosition(){
-    var w=launcherWrap.offsetWidth,h=launcherWrap.offsetHeight;
-    var margin=25, minX=margin,minY=margin;
-    var maxX=window.innerWidth-w-margin,maxY=window.innerHeight-h-margin;
-    if(maxX<minX||maxY<minY)return null;
-    var obstacles=Array.from(document.querySelectorAll('a,button,input,select,textarea,[role="button"],[role="link"]'))
-      .filter(function(el){return !launcherWrap.contains(el)&&!popup.contains(el)&&el.getClientRects().length;})
-      .map(function(el){var r=el.getBoundingClientRect();return {left:r.left-28,right:r.right+28,top:r.top-28,bottom:r.bottom+28};});
-    for(var attempt=0;attempt<55;attempt++){
-      var x=minX+Math.random()*(maxX-minX),y=minY+Math.random()*(maxY-minY);
-      var clear=obstacles.every(function(r){return x+w<=r.left||x>=r.right||y+h<=r.top||y>=r.bottom;});
-      if(clear)return {x:x,y:y};
-    }
-    return null;
-  }
-  function wander(){
-    clearTimeout(moveTimer);
-    if(!popup.hidden||dragState){moveTimer=window.setTimeout(wander,1200);return;}
-    var spot=findSafePosition();
-    if(spot){
-      launcherWrap.style.left=spot.x+'px';launcherWrap.style.top=spot.y+'px';
-      launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
-      if(Math.random()<.7){launcherWrap.classList.remove('playful');void launcherWrap.offsetWidth;launcherWrap.classList.add('playful');}
-    }
-    moveTimer=window.setTimeout(wander,5200+Math.random()*7800);
-  }
-  var firstSpot=findSafePosition();
-  if(firstSpot){launcherWrap.style.left=firstSpot.x+'px';launcherWrap.style.top=firstSpot.y+'px';launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';}
-  void launcherWrap.offsetWidth;
-  window.requestAnimationFrame(function(){launcherWrap.classList.add('support-ready');});
-  moveTimer=window.setTimeout(wander,4200+Math.random()*1800);
-  launcherWrap.addEventListener('pointerdown',function(event){
-    if(!popup.hidden||event.button!==0)return;
-    var rect=launcherWrap.getBoundingClientRect();
-    dragState={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,left:rect.left,top:rect.top,moved:false};
-    launcherWrap.setPointerCapture(event.pointerId);
-  });
-  launcherWrap.addEventListener('pointermove',function(event){
-    if(!dragState||event.pointerId!==dragState.pointerId)return;
-    var dx=event.clientX-dragState.startX,dy=event.clientY-dragState.startY;
-    if(Math.abs(dx)+Math.abs(dy)>5)dragState.moved=true;
-    if(!dragState.moved)return;
-    var edge=25;
-    var maxLeft=Math.max(edge,window.innerWidth-launcherWrap.offsetWidth-edge);
-    var maxTop=Math.max(edge,window.innerHeight-launcherWrap.offsetHeight-edge);
-    launcherWrap.style.left=Math.min(maxLeft,Math.max(edge,dragState.left+dx))+'px';
-    launcherWrap.style.top=Math.min(maxTop,Math.max(edge,dragState.top+dy))+'px';
-    launcherWrap.style.right='auto';launcherWrap.style.bottom='auto';
-    launcherWrap.classList.add('dragging');
-  });
-  function finishDrag(event){
-    if(!dragState||event.pointerId!==dragState.pointerId)return;
-    if(dragState.moved){suppressLauncherClick=true;window.setTimeout(function(){suppressLauncherClick=false;},0);}
-    dragState=null;launcherWrap.classList.remove('dragging');
-  }
-  launcherWrap.addEventListener('pointerup',finishDrag);
-  launcherWrap.addEventListener('pointercancel',finishDrag);
   document.addEventListener('click',function(event){
     if(suppressLauncherClick&&event.target.closest('#supportLauncherWrap')){suppressLauncherClick=false;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();return;}
     var target=event.target.closest('[data-support-action]');
