@@ -360,12 +360,34 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 .home-audio-toggle:focus-visible{outline:2px solid #00e5ff;outline-offset:3px}
 
   /* Support launcher: fixed position and no movement */
-  #supportLauncherWrap{opacity:1!important;visibility:visible!important;position:fixed!important;right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;cursor:default!important;touch-action:manipulation!important;transition:none!important;transform:none!important;}
+  #supportLauncherWrap{opacity:1!important;visibility:visible!important;position:fixed!important;right:max(33px,env(safe-area-inset-right))!important;bottom:max(33px,env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;cursor:default!important;touch-action:manipulation!important;transition:none!important;transform:none!important;}
   #supportLauncherWrap::before{animation:none!important;}
   #supportLauncherWrap.support-ready{animation:none!important;opacity:1!important;}
   #supportLauncherWrap .support-speech{font-size:8px!important;line-height:1.2!important;padding:5px 7px!important;max-width:min(160px,58vw)!important;animation:none!important;}
   #supportLauncherWrap .support-btn,#supportLauncherWrap .support-btn:hover,#supportLauncherWrap .support-btn:active{animation:none!important;transform:none!important;transition:none!important;}
   #supportLauncherWrap .support-btn img{animation:none!important;transform:none!important;}
+
+/* Desktop support launcher refinement */
+@media (min-width: 768px) {
+  #supportLauncherWrap {
+    right: max(48px, env(safe-area-inset-right)) !important;
+    bottom: max(48px, env(safe-area-inset-bottom)) !important;
+  }
+  #supportLauncherWrap .support-btn {
+    width: 72px !important;
+    height: 72px !important;
+  }
+  #supportLauncherWrap .support-speech {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    padding: 8px 11px !important;
+    max-width: 220px !important;
+  }
+  #supportPopup .support-panel {
+    width: min(390px, calc(100vw - 64px)) !important;
+  }
+}
+
 </style>
 </head>
 
