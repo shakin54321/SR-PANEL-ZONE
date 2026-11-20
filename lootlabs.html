@@ -360,7 +360,7 @@ html.page-hidden *,html.page-hidden *::before,html.page-hidden *::after{animatio
 .home-audio-toggle:focus-visible{outline:2px solid #00e5ff;outline-offset:3px}
 
   /* Support launcher: fixed position and no movement */
-  #supportLauncherWrap{position:fixed!important;right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;cursor:default!important;touch-action:manipulation!important;transition:none!important;transform:none!important;}
+  #supportLauncherWrap{opacity:1!important;visibility:visible!important;position:fixed!important;right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;left:auto!important;top:auto!important;cursor:default!important;touch-action:manipulation!important;transition:none!important;transform:none!important;}
   #supportLauncherWrap::before{animation:none!important;}
   #supportLauncherWrap.support-ready{animation:none!important;opacity:1!important;}
   #supportLauncherWrap .support-speech{font-size:8px!important;line-height:1.2!important;padding:5px 7px!important;max-width:min(160px,58vw)!important;animation:none!important;}
@@ -1131,7 +1131,7 @@ window.EmberBG = { config: CFG, stats, pause: stop, resume: start,
   function setOpen(open){
     popup.hidden=!open;
     launcher.setAttribute('aria-expanded',String(open));
-    if(open){launcherWrap.classList.add('support-suspended');clearTimeout(moveTimer);clearTimeout(speechTimer);}
+    if(open){launcherWrap.classList.add('support-suspended');clearTimeout(speechTimer);}
     else{launcherWrap.classList.remove('support-suspended');scheduleSpeech();}
   }
   var dragState=null;
